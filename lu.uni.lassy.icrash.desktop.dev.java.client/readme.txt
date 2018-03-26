@@ -23,7 +23,7 @@ specified according to the Messir methodology and using the Excalibur tool.
 Prerequisites
 --------------------------
 1. Install the iCrash Java SERVER side implementation.
-2. Launch the iCrash server.
+2. Launch the iCrash server.    
 
 
 
