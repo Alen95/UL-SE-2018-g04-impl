@@ -78,6 +78,13 @@ public interface ActProxyAdministrator extends ActProxyAuthenticated {
 	 * @throws RemoteException Thrown if the server is offline
 	 */
 	public PtBoolean ieSurveyCreated() throws RemoteException;
+
+	/**
+	 * A message received from the server side actor saying the survey was edited
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 */
+	public PtBoolean ieSurveyEdited() throws RemoteException;
 	
 	
 }

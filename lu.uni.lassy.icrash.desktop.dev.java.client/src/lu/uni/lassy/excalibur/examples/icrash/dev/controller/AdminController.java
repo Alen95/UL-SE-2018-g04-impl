@@ -14,8 +14,11 @@ package lu.uni.lassy.excalibur.examples.icrash.dev.controller;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
+import javafx.collections.ObservableList;
 import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.IncorrectFormatException;
 import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerNotBoundException;
 import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerOfflineException;
@@ -31,6 +34,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.actors.ActProxyAdministratorImpl;
+
 
 /**
  * The Class AdminController, used to do functions that an admin can only do.
@@ -108,6 +112,35 @@ public class AdminController extends AbstractUserController {
 		}
 		return new PtBoolean(false);
 	}
+	
+	/**
+	 * If an administrator is logged in, will send a editSurvey request to the server. If successful, it will return a PtBoolean of true
+	 * @param surveyID The survey ID specified by the user not the system in the creation process
+	 * @param status status of the survey specified by the user
+	 * @return Returns a PtBoolean true if the survey was edited, otherwise will return false
+	 * @throws ServerOfflineException is an error that is thrown when the server is offline or not reachable
+	 * @throws ServerNotBoundException is only thrown when attempting to access a server which has no current binding. This shouldn't happen, but you never know!
+	 * @throws IncorrectFormatException is thrown when a Dt/Et information type does not match the is() method specified in the specification
+	 */
+	public PtBoolean oeEditSurvey(String surveyID,String status) throws ServerOfflineException, ServerNotBoundException, IncorrectFormatException{
+		if (getUserType() == UserType.Admin){
+			ActProxyAdministratorImpl actorAdmin = (ActProxyAdministratorImpl)getAuth();
+			DtSurveyID aDtSurveyID = new DtSurveyID(new PtString(surveyID));
+			EtSurveyStatus sStatus = EtSurveyStatus.valueOf(status);
+			try {
+				return actorAdmin.oeEditSurvey(aDtSurveyID, sStatus);
+			} catch (RemoteException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerOfflineException();
+			} catch (NotBoundException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerNotBoundException();
+			}
+		}
+		return new PtBoolean(false);
+	}
+	
+
 	/**
 	 * If an administrator is logged in, will send a deleteCoordinator request to the server. If successful, it will return a PtBoolean of true
 	 * @param coordinatorID The ID of the coordinator to delete
@@ -136,4 +169,5 @@ public class AdminController extends AbstractUserController {
 		}
 		return new PtBoolean(false);
 	}
+
 }

@@ -364,6 +364,15 @@ public interface IcrashSystem extends Remote {
 	public PtBoolean oeCreateSurvey(DtSurveyID aDtSurveyID,PtString name, EtSurveyStatus status) throws RemoteException;
 	
 	/**
+	 * Edits a survey's status
+	 * @param aDtSurveyID the ID of the survey to be changed
+	 * @param status the new status to be set
+	 * @return The success of the method
+	 * @throws RemoteException thrown if the server is offline
+	 */
+	public PtBoolean oeEditSurvey(DtSurveyID aDtSurveyID,EtSurveyStatus status) throws RemoteException;
+
+	/**
 	 * Deletes a coordinator with the details specified.
 	 *
 	 * @param aDtCoordinatorID The coordiantor ID to delete from the system

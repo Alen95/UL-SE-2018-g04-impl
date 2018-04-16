@@ -44,7 +44,12 @@ public class Message {
 		ieSmsSend,
 		
 		/**The ie survey created*/
-		ieSurveyCreated
+		ieSurveyCreated,
+		
+		/**
+		 * The ie survey edited
+		 */
+		ieSurveyEdited
 	}
 	
 	/**

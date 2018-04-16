@@ -64,6 +64,13 @@ public class ActProxyAdministratorImpl extends ActProxyAuthenticatedImpl impleme
 		else
 			return new PtBoolean(false);
 	}
+	
+	synchronized public PtBoolean oeEditSurvey(DtSurveyID aDtSurveyID, EtSurveyStatus status) throws RemoteException, NotBoundException {
+		if(getServerSideActor() !=null)
+			return ((ActAdministrator) getServerSideActor()).oeEditSurvey(aDtSurveyID, status);
+		else
+			return new PtBoolean(false);
+	}
 
 	/* (non-Javadoc)
 	 * @see lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActProxyAdministrator#oeDeleteCoordinator(lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID)
@@ -119,6 +126,14 @@ public class ActProxyAdministratorImpl extends ActProxyAuthenticatedImpl impleme
 		Logger log = Log4JUtils.getInstance().getLogger();
 		log.info("message ActAdministrator.ieSurveyCreated received from system");
 		listOfMessages.add(new Message(MessageType.ieSurveyCreated));
+		return new PtBoolean(true);
+	}
+	
+	@Override
+	public PtBoolean ieSurveyEdited() throws RemoteException {
+		Logger log = Log4JUtils.getInstance().getLogger();
+		log.info("message ActAdministrator.ieSurveyEdited received from system");
+		listOfMessages.add(new Message(MessageType.ieSurveyEdited));
 		return new PtBoolean(true);
 	}
 }

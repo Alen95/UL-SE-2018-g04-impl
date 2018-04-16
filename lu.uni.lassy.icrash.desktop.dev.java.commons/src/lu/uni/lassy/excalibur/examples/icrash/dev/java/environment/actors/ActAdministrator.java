@@ -56,6 +56,18 @@ public interface ActAdministrator extends ActAuthenticated {
 			NotBoundException;
 	
 	/**
+	 * Edit a survey's status
+	 * @param aDtSurveyID the ID of the survey to be edited
+	 * @param status the new status to be set
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 * @throws NotBoundException Thrown if the server has not been bound correctly in RMI settings
+	 */
+	public PtBoolean oeEditSurvey(DtSurveyID aDtSurveyID,
+			EtSurveyStatus status) throws RemoteException,
+			NotBoundException;
+	
+	/**
 	 * Delete a coordinator to the system, using the parameters passed.
 	 *
 	 * @param aDtCoordinatorID The ID to use when looking for the coordinator to delete
@@ -95,5 +107,12 @@ public interface ActAdministrator extends ActAuthenticated {
 	 * @return The success of the method
 	 * @throws RemoteException Thrown if the server is offline
 	 */
-	public PtBoolean ieCoordinatorUpdated() throws RemoteException;	
+	public PtBoolean ieCoordinatorUpdated() throws RemoteException;
+
+	/**
+	 * A message sent to the listening actor saying the survey was edited
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 */
+	public PtBoolean ieSurveyEdited() throws RemoteException;	
 }

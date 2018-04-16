@@ -27,6 +27,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActAdm
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIsActor;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
@@ -34,7 +35,9 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.abstractgui.AbstractAuthGUIController;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.coordinator.CreateICrashCoordGUI;
 import javafx.scene.layout.GridPane;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 /*
@@ -43,6 +46,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
@@ -109,6 +113,10 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     @FXML
     private Button bttnBottomAdminCreateSurvey;
 
+    /** The button that shows the controls for editing a survey*/
+    @FXML
+    private Button bttnBottomAdminEditSurvey;
+    
     /**
      * The button event that will show the controls for adding a coordinator
      *
@@ -158,6 +166,16 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     void bttnBottomAdminCreateSurvey_OnClick(ActionEvent event) {
     	showSurveyScreen(TypeOfEdit.Add);
    
+    }
+    
+    /**
+     * The button event that will show the controls for adding a new survey
+     *
+     * @param event The event type thrown, we do not need this, but it must be specified
+     */
+    @FXML
+    void bttnBottomAdminEditSurvey_OnClick(ActionEvent event) {
+    		showSurveyScreen(TypeOfEdit.Edit);
     }
 
     /*
@@ -257,7 +275,21 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 		case Delete:
 			bttntypOK = new Button("Delete");
 			grdpn.add(bttntypOK, 1, 2);
-			break;		
+			break;	
+			
+		case Edit:
+		    TableView table = new TableView();
+		    TableColumn surveyNameCol = new TableColumn("Name");
+		    TableColumn surveyIdCol = new TableColumn("ID");
+		    TableColumn surveyStatusCol = new TableColumn("Status");
+
+		    table.getColumns().addAll(surveyIdCol,surveyNameCol,surveyStatusCol);
+		    grdpn.add(table, 1, 5);
+		    bttntypOK = new Button("Edit");
+			txtfldSurveyName.setPromptText("Survey status");
+			grdpn.add(txtfldSurveyName, 1, 2);
+			grdpn.add(bttntypOK, 1, 4);
+			break;
 		}
 		bttntypOK.setDefaultButton(true);
 		bttntypOK.setOnAction(new EventHandler<ActionEvent>() {
@@ -270,8 +302,15 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 						DtSurveyID surveyID = new DtSurveyID(new PtString(txtfldSurveyID.getText()));
 						switch(type){
 						case Add:
-							if (!userController.oeCreateSurvey(txtfldSurveyID.getText(), txtfldSurveyName.getText(), "open").getValue()){
+							if (!userController.oeCreateSurvey(txtfldSurveyID.getText(),txtfldSurveyName.getText(), "open").getValue()){
 								showErrorMessage("Unable to add Survey", "An error occured when adding the Survey");
+							}
+							anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+							break;
+							
+						case Edit:
+							if (!userController.oeEditSurvey(txtfldSurveyID.getText(), txtfldSurveyName.getText().toLowerCase()).getValue()){
+								showErrorMessage("Unable to edit Survey", "An error occured when editing the Survey");
 							}
 							anchrpnCoordinatorDetails.getChildren().remove(grdpn);
 							break;
