@@ -181,7 +181,29 @@ LOCK TABLES `reports` WRITE;
 /*!40000 ALTER TABLE `reports` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--
+-- Table structure for table `surveys`
+--
 
+DROP TABLE IF EXISTS `surveys`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `surveys` (
+ `id` varchar(80) NOT NULL,
+ `name` varchar(80) DEFAULT NULL,
+  `status` varchar(80) DEFAULT NULL,
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `surveys`
+--
+
+LOCK TABLES `surveys` WRITE;
+/*!40000 ALTER TABLE `surveys` DISABLE KEYS */;
+/*!40000 ALTER TABLE `surveys` ENABLE KEYS */;
+UNLOCK TABLES;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

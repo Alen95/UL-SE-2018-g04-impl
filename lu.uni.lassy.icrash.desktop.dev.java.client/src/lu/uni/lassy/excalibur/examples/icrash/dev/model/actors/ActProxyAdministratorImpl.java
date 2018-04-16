@@ -19,7 +19,10 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActPro
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message.MessageType;
@@ -51,6 +54,13 @@ public class ActProxyAdministratorImpl extends ActProxyAuthenticatedImpl impleme
 	synchronized public PtBoolean oeAddCoordinator(DtCoordinatorID aDtCoordinatorID, DtLogin aDtLogin, DtPassword aDtPassword) throws RemoteException, NotBoundException {
 		if(getServerSideActor() !=null)
 			return ((ActAdministrator) getServerSideActor()).oeAddCoordinator(aDtCoordinatorID, aDtLogin, aDtPassword);
+		else
+			return new PtBoolean(false);
+	}
+	
+	synchronized public PtBoolean oeCreateSurvey(DtSurveyID aDtSurveyID, PtString name, EtSurveyStatus status) throws RemoteException, NotBoundException {
+		if(getServerSideActor() !=null)
+			return ((ActAdministrator) getServerSideActor()).oeCreateSurvey(aDtSurveyID, name, status);
 		else
 			return new PtBoolean(false);
 	}
@@ -102,5 +112,13 @@ public class ActProxyAdministratorImpl extends ActProxyAuthenticatedImpl impleme
 	@Override
 	public PtBoolean oeLogout() throws RemoteException, NotBoundException {
 		return super.oeLogout();
+	}
+
+	@Override
+	public PtBoolean ieSurveyCreated() throws RemoteException {
+		Logger log = Log4JUtils.getInstance().getLogger();
+		log.info("message ActAdministrator.ieSurveyCreated received from system");
+		listOfMessages.add(new Message(MessageType.ieSurveyCreated));
+		return new PtBoolean(true);
 	}
 }

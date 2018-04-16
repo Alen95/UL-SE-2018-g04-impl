@@ -36,15 +36,18 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtGP
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPhoneNumber;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtAlertStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisType;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtHumanKind;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtDate;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtDateAndTime;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtTime;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtInteger;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 
 /**
  * The Interface IcrashSystem that allows RMI access to the server methods.
@@ -349,6 +352,16 @@ public interface IcrashSystem extends Remote {
 	 * @throws RemoteException Thrown if the server is offline
 	 */
 	public PtBoolean oeAddCoordinator(DtCoordinatorID aDtCoordinatorID,DtLogin aDtLogin,DtPassword aDtPassword) throws RemoteException; 	
+	
+	/**
+	 * Adds a survey with the details specified
+	 * @param aDtSurveyID the ID to create the survey with
+	 * @param name the name of the survey
+	 * @param status the status of the survey
+	 * @return The success of the method
+	 * @throws RemoteException thrown if the server is offline
+	 */
+	public PtBoolean oeCreateSurvey(DtSurveyID aDtSurveyID,PtString name, EtSurveyStatus status) throws RemoteException;
 	
 	/**
 	 * Deletes a coordinator with the details specified.

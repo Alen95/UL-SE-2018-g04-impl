@@ -22,7 +22,10 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.IcrashSystem;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.RmiUtils;
 
@@ -153,6 +156,46 @@ public class ActAdministratorImpl extends ActAuthenticatedImpl implements
 			try {
 				if (aProxy instanceof ActProxyAdministrator)
 					((ActProxyAdministrator) aProxy).ieCoordinatorUpdated();
+			} catch (RemoteException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				iterator.remove();
+			}
+		}
+		return new PtBoolean(true);
+	}
+
+	@Override
+	public PtBoolean oeCreateSurvey(DtSurveyID aDtSurveyID, PtString name, EtSurveyStatus status)
+			throws RemoteException, NotBoundException {
+		Logger log = Log4JUtils.getInstance().getLogger();
+
+		Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(),RmiUtils.getInstance().getPort());
+
+		//Gathering the remote object as it was published into the registry
+		IcrashSystem iCrashSys_Server = (IcrashSystem) registry
+				.lookup("iCrashServer");
+
+		//set up ActAuthenticated instance that performs the request
+		iCrashSys_Server.setCurrentRequestingAuthenticatedActor(this);
+
+		log.info("message ActAdministrator.oeCreateSurvey sent to system");
+		PtBoolean res = iCrashSys_Server.oeCreateSurvey(aDtSurveyID,
+				name, status);
+
+		if (res.getValue() == true)
+			log.info("operation oeCreateSurvey successfully executed by the system");
+
+		return res;
+	}
+
+	@Override
+	public PtBoolean ieSurveyCreated() throws RemoteException {
+		for (Iterator<ActProxyAuthenticated> iterator = listeners.iterator(); iterator
+				.hasNext();) {
+			ActProxyAuthenticated aProxy = iterator.next();
+			try {
+				if (aProxy instanceof ActProxyAdministrator)
+					((ActProxyAdministrator) aProxy).ieSurveyCreated();
 			} catch (RemoteException e) {
 				Log4JUtils.getInstance().getLogger().error(e);
 				iterator.remove();

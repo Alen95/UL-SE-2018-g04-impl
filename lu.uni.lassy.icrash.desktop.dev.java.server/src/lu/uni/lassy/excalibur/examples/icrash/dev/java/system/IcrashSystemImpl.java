@@ -39,6 +39,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbComCompanies;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbCoordinators;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbCrises;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbHumans;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbSurveys;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAlert;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAuthenticated;
@@ -46,6 +47,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCo
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtHuman;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtState;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAlertID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtComment;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
@@ -54,10 +56,12 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtGP
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPhoneNumber;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtAlertStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisType;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtHumanKind;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.secondary.DtSMS;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtDate;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtDateAndTime;
@@ -1359,5 +1363,33 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			log.error("Exception in oeSetClock..." + ex);
 			return new PtBoolean(false);
 		}
+	}
+
+	@Override
+	public PtBoolean oeCreateSurvey(DtSurveyID aDtSurveyID, PtString name, EtSurveyStatus status)
+			throws RemoteException {
+		try {
+			//PreP1
+			isSystemStarted();
+			//PreP2
+			isAdminLoggedIn();
+			Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(), RmiUtils.getInstance().getPort());
+			IcrashEnvironment env = (IcrashEnvironment) registry
+					.lookup("iCrashEnvironment");;
+
+			//PostF2
+			CtSurvey ctSurvey = new CtSurvey();
+			ctSurvey.init(aDtSurveyID, name, status);
+			DbSurveys.insertSurvey(ctSurvey.id.value.getValue(),ctSurvey.name.getValue(),"open");
+
+			//PostF5
+			ActAdministrator admin = (ActAdministrator) currentRequestingAuthenticatedActor;
+			admin.ieSurveyCreated();
+			
+		} catch (Exception ex) {
+			log.error("Exception in oeCreateSurvey..." + ex);
+		}
+
+		return new PtBoolean(true);
 	}
 }

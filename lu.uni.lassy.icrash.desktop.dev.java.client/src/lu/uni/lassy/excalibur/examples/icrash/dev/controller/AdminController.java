@@ -25,6 +25,8 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntI
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
@@ -67,6 +69,35 @@ public class AdminController extends AbstractUserController {
 			ht.put(aDtPassword, aDtPassword.value.getValue());
 			try {
 				return actorAdmin.oeAddCoordinator(aDtCoordinatorID, aDtLogin, aDtPassword);
+			} catch (RemoteException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerOfflineException();
+			} catch (NotBoundException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerNotBoundException();
+			}
+		}
+		return new PtBoolean(false);
+	}
+	
+	/**
+	 * If an administrator is logged in, will send a createSurvey request to the server. If successful, it will return a PtBoolean of true
+	 * @param surveyID The survey ID specified by the user not the system in the creation process
+	 * @param name name of the survey specified by the user
+	 * @param status status of the survey specified by the user
+	 * @return Returns a PtBoolean true if the user was created, otherwise will return false
+	 * @throws ServerOfflineException is an error that is thrown when the server is offline or not reachable
+	 * @throws ServerNotBoundException is only thrown when attempting to access a server which has no current binding. This shouldn't happen, but you never know!
+	 * @throws IncorrectFormatException is thrown when a Dt/Et information type does not match the is() method specified in the specification
+	 */
+	public PtBoolean oeCreateSurvey(String surveyID, String name, String status) throws ServerOfflineException, ServerNotBoundException, IncorrectFormatException{
+		if (getUserType() == UserType.Admin){
+			ActProxyAdministratorImpl actorAdmin = (ActProxyAdministratorImpl)getAuth();
+			DtSurveyID aDtSurveyID = new DtSurveyID(new PtString(surveyID));
+			PtString sName = new PtString(name);
+			EtSurveyStatus sStatus = EtSurveyStatus.valueOf(status);
+			try {
+				return actorAdmin.oeCreateSurvey(aDtSurveyID, sName, sStatus);
 			} catch (RemoteException e) {
 				Log4JUtils.getInstance().getLogger().error(e);
 				throw new ServerOfflineException();

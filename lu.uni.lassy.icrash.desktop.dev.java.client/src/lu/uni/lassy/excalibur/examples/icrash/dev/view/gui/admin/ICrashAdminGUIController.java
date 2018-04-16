@@ -26,6 +26,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerOf
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIsActor;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
@@ -83,6 +84,10 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     /** The anchorpane that will have the add or delete coordinator controls added/removed from it */
     @FXML
     private AnchorPane anchrpnCoordinatorDetails;
+    
+    /** The anchorpane that will have the add, delete or edit survey controls added/removed from it */
+    @FXML
+    private AnchorPane anchrpnSurveyDetails;
 
     /** The button that shows the controls for adding a coordinator */
     @FXML
@@ -99,6 +104,10 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     /** The button that allows a user to logoff */
     @FXML
     private Button bttnAdminLogoff;
+    
+    /** The button that shows the controls for adding a survey**/
+    @FXML
+    private Button bttnBottomAdminCreateSurvey;
 
     /**
      * The button event that will show the controls for adding a coordinator
@@ -139,6 +148,17 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     void bttnTopLogoff_OnClick(ActionEvent event) {
     	logoff();
     }
+    
+    /**
+     * The button event that will show the controls for adding a new survey
+     *
+     * @param event The event type thrown, we do not need this, but it must be specified
+     */
+    @FXML
+    void bttnBottomAdminCreateSurvey_OnClick(ActionEvent event) {
+    	showSurveyScreen(TypeOfEdit.Add);
+   
+    }
 
     /*
      * These are other classes accessed by this controller
@@ -157,11 +177,16 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	 */
 	private enum TypeOfEdit{
 		
-		/** Adding a coordinator. */
+		/** Adding a coordinator,survey. */
 		Add,
 		
-		/** Deleting a coordinator. */
-		Delete
+		/** Deleting a coordinator,survey. */
+		Delete,
+		
+		/** Edit a survey*/
+		Edit
+		
+		
 	}
 	
 	/**
@@ -209,9 +234,77 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	}
 
 	/**
+	 * Shows the modify survey screen.
+	 *
+	 * @param type The type of edit to be done, this could be add or delete or edit
+	 */
+	private void showSurveyScreen(TypeOfEdit type){
+		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
+			anchrpnCoordinatorDetails.getChildren().remove(i);
+		TextField txtfldSurveyID = new TextField();
+		TextField txtfldSurveyName = new TextField();
+		txtfldSurveyID.setPromptText("Survey ID");
+		Button bttntypOK = null;
+		GridPane grdpn = new GridPane();
+		grdpn.add(txtfldSurveyID, 1, 1);
+		switch(type){
+		case Add:
+			bttntypOK = new Button("Create");
+			txtfldSurveyName.setPromptText("Survey name");
+			grdpn.add(txtfldSurveyName, 1, 2);
+			grdpn.add(bttntypOK, 1, 4);
+			break;
+		case Delete:
+			bttntypOK = new Button("Delete");
+			grdpn.add(bttntypOK, 1, 2);
+			break;		
+		}
+		bttntypOK.setDefaultButton(true);
+		bttntypOK.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				if (!checkIfAllDialogHasBeenFilledIn(grdpn))
+					showWarningNoDataEntered();
+				else{
+					try {
+						DtSurveyID surveyID = new DtSurveyID(new PtString(txtfldSurveyID.getText()));
+						switch(type){
+						case Add:
+							if (!userController.oeCreateSurvey(txtfldSurveyID.getText(), txtfldSurveyName.getText(), "open").getValue()){
+								showErrorMessage("Unable to add Survey", "An error occured when adding the Survey");
+							}
+							anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+							break;
+						/*case Delete:
+							if (userController.oeDeleteCoordinator(txtfldUserID.getText()).getValue()){
+								for(CreateICrashCoordGUI window : listOfOpenWindows){
+									if (window.getDtCoordinatorID().value.getValue().equals(coordID.value.getValue()))
+										window.closeWindow();
+								}
+								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+							}
+							else
+								showErrorMessage("Unable to delete coordinator", "An error occured when deleting the coordinator");
+							break;*/
+						}
+					} catch (ServerOfflineException | ServerNotBoundException | IncorrectFormatException e) {
+						showExceptionErrorMessage(e);
+					}					
+				}
+			}
+		});
+		anchrpnCoordinatorDetails.getChildren().add(grdpn);
+		AnchorPane.setTopAnchor(grdpn, 0.0);
+		AnchorPane.setLeftAnchor(grdpn, 0.0);
+		AnchorPane.setBottomAnchor(grdpn, 0.0);
+		AnchorPane.setRightAnchor(grdpn, 0.0);
+		txtfldSurveyID.requestFocus();
+	}
+
+	/**
 	 * Shows the modify coordinator screen.
 	 *
-	 * @param type The type of edit to be done, this could be add or delete
+	 * @param type The type of edit to be done, this could be add or delete 
 	 */
 	private void showCoordinatorScreen(TypeOfEdit type){
 		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
@@ -280,7 +373,6 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 		AnchorPane.setRightAnchor(grdpn, 0.0);
 		txtfldUserID.requestFocus();
 	}
-
 	/* (non-Javadoc)
 	 * @see lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.abstractgui.AbstractAuthGUIController#logon()
 	 */

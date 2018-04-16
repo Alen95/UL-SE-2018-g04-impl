@@ -18,7 +18,10 @@ import java.rmi.RemoteException;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 
 /**
  * The Interface ActAdministrator that allows RMI access to administrator functions.
@@ -40,6 +43,19 @@ public interface ActAdministrator extends ActAuthenticated {
 			NotBoundException;
 
 	/**
+	 * Add a survey to the system using the provided parameters
+	 * @param aDtSurveyID id of the survey
+	 * @param name name of the survey
+	 * @param status status of the survey
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 * @throws NotBoundException Thrown if the server has not been bound correctly in RMI settings
+	 */
+	public PtBoolean oeCreateSurvey(DtSurveyID aDtSurveyID,
+			PtString name, EtSurveyStatus status) throws RemoteException,
+			NotBoundException;
+	
+	/**
 	 * Delete a coordinator to the system, using the parameters passed.
 	 *
 	 * @param aDtCoordinatorID The ID to use when looking for the coordinator to delete
@@ -57,6 +73,13 @@ public interface ActAdministrator extends ActAuthenticated {
 	 * @throws RemoteException Thrown if the server is offline
 	 */
 	public PtBoolean ieCoordinatorAdded() throws RemoteException;
+
+	/**
+	 * A message sent to the listening actor saying the survey was created
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 */
+	public PtBoolean ieSurveyCreated() throws RemoteException;
 
 	/**
 	 * A message sent to the listening actor saying the coordinator was deleted.
