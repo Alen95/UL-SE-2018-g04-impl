@@ -25,6 +25,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerOf
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActProxyAuthenticated.UserType;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIs;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
@@ -189,6 +190,35 @@ public class AdminController extends AbstractUserController {
 			DtSurveyID aDtSurveyID = new DtSurveyID(new PtString(surveyId));
 			try {
 				return actorAdmin.oeAddQuestion(aDtQuestionID, qQuestion, aDtSurveyID);
+			} catch (RemoteException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerOfflineException();
+			} catch (NotBoundException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerNotBoundException();
+			}
+		}
+		return new PtBoolean(false);
+	}
+	
+	/**
+	 * If an administrator is logged in, will send an addAnswer request to the server. If successful, it will return a PtBoolean of true
+	 * @param answerId The id of the answer to be added, defined by the user
+	 * @param answer The answer to be added
+	 * @param questionId The ID of te question the answer should be added to
+	 * @return Returns a PtBoolean true if the answer was created
+	 * @throws ServerOfflineException is an error that is thrown when the server is offline or not reachable
+	 * @throws ServerNotBoundException is only thrown when attempting to access a server which has no current binding. This shouldn't happen, but you never know!
+	 * @throws IncorrectFormatException is thrown when a Dt/Et information type does not match the is() method specified in the specification
+	 */
+	public PtBoolean oeAddAnswer(String answerId, String answer, String questionId) throws ServerOfflineException, ServerNotBoundException, IncorrectFormatException{
+		if (getUserType() == UserType.Admin){
+			ActProxyAdministratorImpl actorAdmin = (ActProxyAdministratorImpl)getAuth();
+			DtQuestionID aDtQuestionID = new DtQuestionID(new PtString(questionId));
+			PtString aAnswer = new PtString(answer);
+			DtAnswerID aDtAnswerID = new DtAnswerID(new PtString(answerId));
+			try {
+				return actorAdmin.oeAddAnswer(aDtAnswerID, aAnswer, aDtQuestionID);
 			} catch (RemoteException e) {
 				Log4JUtils.getInstance().getLogger().error(e);
 				throw new ServerOfflineException();

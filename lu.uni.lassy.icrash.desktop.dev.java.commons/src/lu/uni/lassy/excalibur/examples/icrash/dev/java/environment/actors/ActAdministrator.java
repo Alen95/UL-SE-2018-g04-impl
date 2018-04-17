@@ -15,6 +15,7 @@ package lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
@@ -133,5 +134,23 @@ public interface ActAdministrator extends ActAuthenticated {
 	 * @return The success of the method
 	 * @throws RemoteException Thrown if the server is offline
 	 */
-	public PtBoolean ieQuestionAdded() throws RemoteException;	
+	public PtBoolean ieQuestionAdded() throws RemoteException;
+
+	/**
+	 * Add an answer to the system using the passed parameters
+	 * @param aDtAnswerID The ID of the answer to be added
+	 * @param aAnswer The answer to be added
+	 * @param aDtQuestionID The Id of the question the answer should be added to
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 * @throws NotBoundException Thrown if the server has not been bound correctly in RMI settings
+	 */
+	public PtBoolean oeAddAnswer(DtAnswerID aDtAnswerID, PtString aAnswer, DtQuestionID aDtQuestionID) throws RemoteException, NotBoundException;
+
+	/**
+	 * A message sent to the listening actor saying the answer was added
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 */
+	public PtBoolean ieAnswerAdded() throws RemoteException;	
 }

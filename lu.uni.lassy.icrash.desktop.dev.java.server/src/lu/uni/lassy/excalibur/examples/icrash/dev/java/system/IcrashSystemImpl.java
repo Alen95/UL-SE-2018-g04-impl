@@ -35,6 +35,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActCom
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActCoordinator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActCoordinatorImpl;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbAlerts;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbAnswers;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbComCompanies;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbCoordinators;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbCrises;
@@ -43,6 +44,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbQuestions;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.db.DbSurveys;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAlert;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAuthenticated;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCoordinator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
@@ -51,6 +53,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtQu
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtState;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAlertID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtComment;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCrisisID;
@@ -1443,6 +1446,34 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			
 		} catch (Exception ex) {
 			log.error("Exception in oeAddQuestion..." + ex);
+		}
+
+		return new PtBoolean(true);
+	}
+
+	@Override
+	public PtBoolean oeAddAnswer(DtAnswerID aDtAnswerID, PtString aAnswer, DtQuestionID aDtQuestionID)
+			throws RemoteException {
+		try {
+			//PreP1
+			isSystemStarted();
+			//PreP2
+			isAdminLoggedIn();
+			Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(), RmiUtils.getInstance().getPort());
+			IcrashEnvironment env = (IcrashEnvironment) registry
+					.lookup("iCrashEnvironment");;
+
+			//PostF2
+			CtAnswer ctAnswer= new CtAnswer();
+			ctAnswer.init(aDtAnswerID, aAnswer, aDtQuestionID,0);
+			DbAnswers.insertAnswer(ctAnswer.id.value.getValue(),aAnswer.getValue(),ctAnswer.question_id.value.getValue());
+
+			//PostF5
+			ActAdministrator admin = (ActAdministrator) currentRequestingAuthenticatedActor;
+			admin.ieAnswerAdded();
+			
+		} catch (Exception ex) {
+			log.error("Exception in oeAddAnswer..." + ex);
 		}
 
 		return new PtBoolean(true);

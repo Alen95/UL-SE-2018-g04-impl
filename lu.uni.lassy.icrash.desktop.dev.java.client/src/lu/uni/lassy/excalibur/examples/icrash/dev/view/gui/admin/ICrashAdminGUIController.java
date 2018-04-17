@@ -27,6 +27,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActAdm
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIsActor;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtHuman;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
@@ -203,7 +204,7 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 
     @FXML
     void bttnBottomAdminAddAnswer_OnClick(ActionEvent event) {
-	//TODO
+    		showAnswerScreen(TypeOfEdit.Add);
     }
     /*
      * These are other classes accessed by this controller
@@ -279,6 +280,78 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	}
 
 	/**
+	 * Shows the answer screen.
+	 *
+	 * @param type The type of edit to be done, this could be add
+	 */
+	private void showAnswerScreen(TypeOfEdit type){
+		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
+			anchrpnCoordinatorDetails.getChildren().remove(i);
+		TextField txtfldAnswerID = new TextField();
+		TextField txtfldAnswer = new TextField();
+		TextField txtfldQuestionID = new TextField();
+		txtfldQuestionID.setPromptText("Question ID");
+		txtfldAnswerID.setPromptText("Answer ID");
+		txtfldAnswer.setPromptText("Answer");
+		Button bttntypOK = null;
+		GridPane grdpn = new GridPane();
+		grdpn.add(txtfldAnswerID, 1, 1);
+		switch(type){
+		case Add:
+			bttntypOK = new Button("Create");;
+			grdpn.add(txtfldQuestionID, 1, 3);
+			grdpn.add(txtfldAnswer, 1, 4);
+			grdpn.add(bttntypOK, 1, 5);
+			break;
+		case Delete:
+			bttntypOK = new Button("Delete");
+			grdpn.add(bttntypOK, 1, 2);
+			break;		
+		}
+		bttntypOK.setDefaultButton(true);
+		bttntypOK.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				if (!checkIfAllDialogHasBeenFilledIn(grdpn))
+					showWarningNoDataEntered();
+				else{
+					try {
+						DtAnswerID answerID = new DtAnswerID(new PtString(txtfldAnswerID.getText()));
+						switch(type){
+						case Add:
+							if (userController.oeAddAnswer(txtfldAnswerID.getText(), txtfldAnswer.getText(), txtfldQuestionID.getText()).getValue()){
+								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+							}
+							else
+								showErrorMessage("Unable to add Answer", "An error occured when adding the Answer");
+							break;
+						/*case Delete:
+							if (userController.oeDeleteCoordinator(txtfldUserID.getText()).getValue()){
+								for(CreateICrashCoordGUI window : listOfOpenWindows){
+									if (window.getDtCoordinatorID().value.getValue().equals(coordID.value.getValue()))
+										window.closeWindow();
+								}
+								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+							}
+							else
+								showErrorMessage("Unable to delete coordinator", "An error occured when deleting the coordinator");
+							break;*/
+						}
+					} catch (ServerOfflineException | ServerNotBoundException | IncorrectFormatException e) {
+						showExceptionErrorMessage(e);
+					}					
+				}
+			}
+		});
+		anchrpnCoordinatorDetails.getChildren().add(grdpn);
+		AnchorPane.setTopAnchor(grdpn, 0.0);
+		AnchorPane.setLeftAnchor(grdpn, 0.0);
+		AnchorPane.setBottomAnchor(grdpn, 0.0);
+		AnchorPane.setRightAnchor(grdpn, 0.0);
+		txtfldAnswerID.requestFocus();
+	}
+	
+	/**
 	 * Shows the modify Question screen.
 	 *
 	 * @param type The type of edit to be done, this could be add or delete 
@@ -322,7 +395,7 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
 							}
 							else
-								showErrorMessage("Unable to add coordinator", "An error occured when adding the coordinator");
+								showErrorMessage("Unable to add Question", "An error occured when adding the Question");
 							break;
 						/*case Delete:
 							if (userController.oeDeleteCoordinator(txtfldUserID.getText()).getValue()){

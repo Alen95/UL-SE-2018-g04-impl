@@ -239,6 +239,7 @@ DROP TABLE IF EXISTS `answers`;
 CREATE TABLE `answers` (
  `id` varchar(80) NOT NULL,
  `answer` varchar(80) DEFAULT NULL,
+  `count` INT DEFAULT NULL,
  `id_question` varchar(80) DEFAULT NULL,
  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

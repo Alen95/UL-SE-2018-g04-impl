@@ -92,6 +92,13 @@ public interface ActProxyAdministrator extends ActProxyAuthenticated {
 	 * @throws RemoteException Thrown if the server is offline
 	 */
 	public PtBoolean ieQuestionAdded() throws RemoteException;
+
+	/**
+	 * A message received from the server side actor saying the answer was added
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 */
+	public PtBoolean ieAnswerAdded() throws RemoteException;
 	
 	
 }

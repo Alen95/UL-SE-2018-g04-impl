@@ -52,7 +52,10 @@ public class Message {
 		ieSurveyEdited,
 		
 		/**The ie question added*/
-		ieQuestionAdded
+		ieQuestionAdded, 
+		
+		/**The ie answer added*/
+		ieAnswerAdded
 	}
 	
 	/**
