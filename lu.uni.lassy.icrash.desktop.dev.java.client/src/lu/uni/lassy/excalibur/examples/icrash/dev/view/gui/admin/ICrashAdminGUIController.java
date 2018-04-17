@@ -25,7 +25,10 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerNo
 import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerOfflineException;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIsActor;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtHuman;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
@@ -35,6 +38,8 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.abstractgui.AbstractAuthGUIController;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.coordinator.CreateICrashCoordGUI;
 import javafx.scene.layout.GridPane;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -49,9 +54,11 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.util.Callback;
 /*
  * This is the end of the import section to be replaced by modifications in the ICrash.fxml document from the sample skeleton controller
  */
@@ -117,6 +124,13 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     @FXML
     private Button bttnBottomAdminEditSurvey;
     
+    /**The button that shows the controls for adding a new question*/
+    @FXML
+    private Button bttnBottomAdminAddQuestion;
+    
+    /**The button that shows the controls for adding a new answer*/
+    @FXML
+    private Button bttnBottomAdminAddAnswer;
     /**
      * The button event that will show the controls for adding a coordinator
      *
@@ -177,7 +191,20 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     void bttnBottomAdminEditSurvey_OnClick(ActionEvent event) {
     		showSurveyScreen(TypeOfEdit.Edit);
     }
+    
+    /** 
+     * The button event that will show the controls for adding a new question
+     * @param event The event type thrown, we do not need this, but it must be specified
+     */
+    @FXML
+    void bttnBottomAdminAddQuestion_OnClick(ActionEvent event) {
+    		showQuestionScreen(TypeOfEdit.Add);
+    }
 
+    @FXML
+    void bttnBottomAdminAddAnswer_OnClick(ActionEvent event) {
+	//TODO
+    }
     /*
      * These are other classes accessed by this controller
      */
@@ -195,10 +222,10 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	 */
 	private enum TypeOfEdit{
 		
-		/** Adding a coordinator,survey. */
+		/** Adding a coordinator,survey,question. */
 		Add,
 		
-		/** Deleting a coordinator,survey. */
+		/** Deleting a coordinator,survey,question. */
 		Delete,
 		
 		/** Edit a survey*/
@@ -252,6 +279,78 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	}
 
 	/**
+	 * Shows the modify Question screen.
+	 *
+	 * @param type The type of edit to be done, this could be add or delete 
+	 */
+	private void showQuestionScreen(TypeOfEdit type){
+		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
+			anchrpnCoordinatorDetails.getChildren().remove(i);
+		TextField txtfldQuestionID = new TextField();
+		TextField txtfldQuestion = new TextField();
+		TextField txtfldSurveyID = new TextField();
+		txtfldQuestionID.setPromptText("Question ID");
+		txtfldSurveyID.setPromptText("Survey ID");
+		txtfldQuestion.setPromptText("Question");
+		Button bttntypOK = null;
+		GridPane grdpn = new GridPane();
+		grdpn.add(txtfldQuestionID, 1, 1);
+		switch(type){
+		case Add:
+			bttntypOK = new Button("Create");;
+			grdpn.add(txtfldSurveyID, 1, 3);
+			grdpn.add(txtfldQuestion, 1, 4);
+			grdpn.add(bttntypOK, 1, 5);
+			break;
+		case Delete:
+			bttntypOK = new Button("Delete");
+			grdpn.add(bttntypOK, 1, 2);
+			break;		
+		}
+		bttntypOK.setDefaultButton(true);
+		bttntypOK.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				if (!checkIfAllDialogHasBeenFilledIn(grdpn))
+					showWarningNoDataEntered();
+				else{
+					try {
+						DtQuestionID questID = new DtQuestionID(new PtString(txtfldQuestionID.getText()));
+						switch(type){
+						case Add:
+							if (userController.oeAddQuestion(txtfldQuestionID.getText(), txtfldQuestion.getText(), txtfldSurveyID.getText()).getValue()){
+								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+							}
+							else
+								showErrorMessage("Unable to add coordinator", "An error occured when adding the coordinator");
+							break;
+						/*case Delete:
+							if (userController.oeDeleteCoordinator(txtfldUserID.getText()).getValue()){
+								for(CreateICrashCoordGUI window : listOfOpenWindows){
+									if (window.getDtCoordinatorID().value.getValue().equals(coordID.value.getValue()))
+										window.closeWindow();
+								}
+								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+							}
+							else
+								showErrorMessage("Unable to delete coordinator", "An error occured when deleting the coordinator");
+							break;*/
+						}
+					} catch (ServerOfflineException | ServerNotBoundException | IncorrectFormatException e) {
+						showExceptionErrorMessage(e);
+					}					
+				}
+			}
+		});
+		anchrpnCoordinatorDetails.getChildren().add(grdpn);
+		AnchorPane.setTopAnchor(grdpn, 0.0);
+		AnchorPane.setLeftAnchor(grdpn, 0.0);
+		AnchorPane.setBottomAnchor(grdpn, 0.0);
+		AnchorPane.setRightAnchor(grdpn, 0.0);
+		txtfldQuestionID.requestFocus();
+	}
+	
+	/**
 	 * Shows the modify survey screen.
 	 *
 	 * @param type The type of edit to be done, this could be add or delete or edit
@@ -279,11 +378,27 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 			
 		case Edit:
 		    TableView table = new TableView();
-		    TableColumn surveyNameCol = new TableColumn("Name");
-		    TableColumn surveyIdCol = new TableColumn("ID");
-		    TableColumn surveyStatusCol = new TableColumn("Status");
-
+		    TableColumn<CtSurvey,String> surveyNameCol = new TableColumn<CtSurvey,String>("Name");
+		    TableColumn<CtSurvey,String> surveyIdCol = new TableColumn<CtSurvey,String>("ID");
+		    TableColumn<CtSurvey,String> surveyStatusCol = new TableColumn<CtSurvey,String>("Status");
+		    surveyNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+				public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+					return new ReadOnlyObjectWrapper<String>(survey.getValue().name.getValue());
+				}
+			});
+		    surveyIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+				public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+					return new ReadOnlyObjectWrapper<String>(survey.getValue().id.value.getValue());
+				}
+			});
+		    surveyStatusCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+				public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+					return new ReadOnlyObjectWrapper<String>(survey.getValue().status.toString());
+				}
+			});
+		    
 		    table.getColumns().addAll(surveyIdCol,surveyNameCol,surveyStatusCol);
+		    
 		    grdpn.add(table, 1, 5);
 		    bttntypOK = new Button("Edit");
 			txtfldSurveyName.setPromptText("Survey status");

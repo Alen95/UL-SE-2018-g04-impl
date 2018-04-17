@@ -28,6 +28,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntI
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
@@ -159,6 +160,35 @@ public class AdminController extends AbstractUserController {
 				return new PtBoolean(false);
 			try {
 				return actorAdmin.oeDeleteCoordinator(aDtCoordinatorID);
+			} catch (RemoteException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerOfflineException();
+			} catch (NotBoundException e) {
+				Log4JUtils.getInstance().getLogger().error(e);
+				throw new ServerNotBoundException();
+			}
+		}
+		return new PtBoolean(false);
+	}
+	
+	/**
+	 * If an administrator is logged in, will send an addQuestion request to the server. If successful, it will return a PtBoolean of true
+	 * @param questionId The id of the question to be added, defined by the user
+	 * @param question The question to be added
+	 * @param surveyId The ID of the survey the question should be added to
+	 * @return Returns a PtBoolean true if the question was created
+	 * @throws ServerOfflineException is an error that is thrown when the server is offline or not reachable
+	 * @throws ServerNotBoundException is only thrown when attempting to access a server which has no current binding. This shouldn't happen, but you never know!
+	 * @throws IncorrectFormatException is thrown when a Dt/Et information type does not match the is() method specified in the specification
+	 */
+	public PtBoolean oeAddQuestion(String questionId, String question, String surveyId) throws ServerOfflineException, ServerNotBoundException, IncorrectFormatException{
+		if (getUserType() == UserType.Admin){
+			ActProxyAdministratorImpl actorAdmin = (ActProxyAdministratorImpl)getAuth();
+			DtQuestionID aDtQuestionID = new DtQuestionID(new PtString(questionId));
+			PtString qQuestion = new PtString(question);
+			DtSurveyID aDtSurveyID = new DtSurveyID(new PtString(surveyId));
+			try {
+				return actorAdmin.oeAddQuestion(aDtQuestionID, qQuestion, aDtSurveyID);
 			} catch (RemoteException e) {
 				Log4JUtils.getInstance().getLogger().error(e);
 				throw new ServerOfflineException();

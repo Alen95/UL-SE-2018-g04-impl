@@ -36,6 +36,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtGP
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPhoneNumber;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtAlertStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisStatus;
@@ -396,6 +397,16 @@ public interface IcrashSystem extends Remote {
 	 * @return The success of the method
 	 * @throws RemoteException Thrown if the server is offline
 	 */
-	public PtBoolean oeSetClock(DtDateAndTime aCurrentClock) throws RemoteException; 
+	public PtBoolean oeSetClock(DtDateAndTime aCurrentClock) throws RemoteException;
+
+	/**
+	 * Adds a question with the provided data
+	 * @param aDtQuestionID the ID of the question to be added
+	 * @param qQuestion The question to be added
+	 * @param aDtSurveyID The ID of the survey the question should be added to
+	 * @return The success of the method
+	 * @throws RemoteException Thrown if the server is offline
+	 */
+	public PtBoolean oeAddQuestion(DtQuestionID aDtQuestionID, PtString qQuestion, DtSurveyID aDtSurveyID) throws RemoteException; 
 
 }

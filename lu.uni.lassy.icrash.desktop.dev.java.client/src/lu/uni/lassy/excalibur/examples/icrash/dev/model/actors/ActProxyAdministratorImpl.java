@@ -19,6 +19,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActPro
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtPassword;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
@@ -134,6 +135,21 @@ public class ActProxyAdministratorImpl extends ActProxyAuthenticatedImpl impleme
 		Logger log = Log4JUtils.getInstance().getLogger();
 		log.info("message ActAdministrator.ieSurveyEdited received from system");
 		listOfMessages.add(new Message(MessageType.ieSurveyEdited));
+		return new PtBoolean(true);
+	}
+
+	public PtBoolean oeAddQuestion(DtQuestionID aDtQuestionID, PtString qQuestion, DtSurveyID aDtSurveyID) throws RemoteException, NotBoundException {
+		if(getServerSideActor() !=null)
+			return ((ActAdministrator) getServerSideActor()).oeAddQuestion(aDtQuestionID, qQuestion, aDtSurveyID);
+		else
+			return new PtBoolean(false);
+	}
+
+	@Override
+	public PtBoolean ieQuestionAdded() throws RemoteException {
+		Logger log = Log4JUtils.getInstance().getLogger();
+		log.info("message ActAdministrator.ieQuestionAdded received from system");
+		listOfMessages.add(new Message(MessageType.ieQuestionAdded));
 		return new PtBoolean(true);
 	}
 }

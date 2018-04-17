@@ -49,7 +49,10 @@ public class Message {
 		/**
 		 * The ie survey edited
 		 */
-		ieSurveyEdited
+		ieSurveyEdited,
+		
+		/**The ie question added*/
+		ieQuestionAdded
 	}
 	
 	/**
