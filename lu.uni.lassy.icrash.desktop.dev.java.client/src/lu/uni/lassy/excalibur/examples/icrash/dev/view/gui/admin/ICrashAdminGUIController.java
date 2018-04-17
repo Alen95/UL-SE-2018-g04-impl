@@ -15,6 +15,7 @@ import java.net.URL;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import lu.uni.lassy.excalibur.examples.icrash.dev.controller.AdminController;
@@ -25,7 +26,9 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerNo
 import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.ServerOfflineException;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIsActor;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtHuman;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtQuestion;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
@@ -176,6 +179,11 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
      * The button event that will show the controls for adding a new survey
      *
      * @param event The event type thrown, we do not need this, but it must be specified
+     * @throws NotBoundException 
+     * @throws RemoteException 
+     * @throws IncorrectFormatException 
+     * @throws ServerNotBoundException 
+     * @throws ServerOfflineException 
      */
     @FXML
     void bttnBottomAdminCreateSurvey_OnClick(ActionEvent event) {
@@ -187,6 +195,11 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
      * The button event that will show the controls for adding a new survey
      *
      * @param event The event type thrown, we do not need this, but it must be specified
+     * @throws NotBoundException 
+     * @throws RemoteException 
+     * @throws IncorrectFormatException 
+     * @throws ServerNotBoundException 
+     * @throws ServerOfflineException 
      */
     @FXML
     void bttnBottomAdminEditSurvey_OnClick(ActionEvent event) {
@@ -296,17 +309,50 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 		Button bttntypOK = null;
 		GridPane grdpn = new GridPane();
 		grdpn.add(txtfldAnswerID, 1, 1);
+		
+		TableView table = new TableView();
+	    TableColumn<CtAnswer,String> answerNameCol = new TableColumn<CtAnswer,String>("answer");
+	    TableColumn<CtAnswer,String> answerIdCol = new TableColumn<CtAnswer,String>("id");
+	    TableColumn<CtAnswer,String> questionIdCol = new TableColumn<CtAnswer,String>("id_question");
+	    answerNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().answer.getValue());
+			}
+		});
+	    answerIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().id.value.getValue());
+			}
+		});
+	    questionIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().question_id.toString());
+			}
+		});
+	    CtAnswer answer1 = new CtAnswer();
+	    CtAnswer answer2 = new CtAnswer();
+	    CtAnswer answer3 = new CtAnswer();
+	    answer1.init(new DtAnswerID(new PtString("1")), new PtString("Test answer 1"), new DtQuestionID(new PtString("1")), 0);
+	    answer2.init(new DtAnswerID(new PtString("2")), new PtString("Test answer 2"), new DtQuestionID(new PtString("1")), 0);
+	    answer3.init(new DtAnswerID(new PtString("3")), new PtString("Test answer 3"), new DtQuestionID(new PtString("2")), 0);
+
+	    table.getItems().add(answer1);
+	    table.getItems().add(answer2);
+	    table.getItems().add(answer3);
+
+	    table.getColumns().addAll(answerIdCol,answerNameCol,questionIdCol);
+	    grdpn.add(table, 1, 5);
 		switch(type){
 		case Add:
-			bttntypOK = new Button("Create");;
-			grdpn.add(txtfldQuestionID, 1, 3);
-			grdpn.add(txtfldAnswer, 1, 4);
-			grdpn.add(bttntypOK, 1, 5);
+			bttntypOK = new Button("Add");;
+			grdpn.add(txtfldQuestionID, 1, 2);
+			grdpn.add(txtfldAnswer, 1, 3);
+			grdpn.add(bttntypOK, 1, 4);
 			break;
-		case Delete:
+		/*case Delete:
 			bttntypOK = new Button("Delete");
 			grdpn.add(bttntypOK, 1, 2);
-			break;		
+			break;	*/	
 		}
 		bttntypOK.setDefaultButton(true);
 		bttntypOK.setOnAction(new EventHandler<ActionEvent>() {
@@ -368,17 +414,48 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 		Button bttntypOK = null;
 		GridPane grdpn = new GridPane();
 		grdpn.add(txtfldQuestionID, 1, 1);
+		TableView table = new TableView();
+	    TableColumn<CtQuestion,String> QuestionNameCol = new TableColumn<CtQuestion,String>("question");
+	    TableColumn<CtQuestion,String> QuestionIdCol = new TableColumn<CtQuestion,String>("id");
+	    TableColumn<CtQuestion,String> surveyIdCol = new TableColumn<CtQuestion,String>("id_survey");
+	    QuestionNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().question.getValue());
+			}
+		});
+	    surveyIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().survey_id.value.getValue());
+			}
+		});
+	    QuestionIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().id.toString());
+			}
+		});
+	    CtQuestion question1 = new CtQuestion();
+	    question1.init(new DtQuestionID(new PtString("1")), new PtString("Test question 1"), new DtSurveyID(new PtString("1")));
+	    CtQuestion question2 = new CtQuestion();
+	    question2.init(new DtQuestionID(new PtString("2")), new PtString("Test question 2"), new DtSurveyID(new PtString("1")));
+	    CtQuestion question3 = new CtQuestion();
+	    question3.init(new DtQuestionID(new PtString("3")), new PtString("Test question 3"), new DtSurveyID(new PtString("1")));
+	    table.getItems().add(question1);
+	    table.getItems().add(question2);
+	    table.getItems().add(question3);
+
+	    table.getColumns().addAll(QuestionIdCol,QuestionNameCol,surveyIdCol);
+	    grdpn.add(table, 1, 5);
 		switch(type){
 		case Add:
-			bttntypOK = new Button("Create");;
-			grdpn.add(txtfldSurveyID, 1, 3);
-			grdpn.add(txtfldQuestion, 1, 4);
-			grdpn.add(bttntypOK, 1, 5);
+			bttntypOK = new Button("Add");;
+			grdpn.add(txtfldSurveyID, 1, 2);
+			grdpn.add(txtfldQuestion, 1, 3);
+			grdpn.add(bttntypOK, 1, 4);
 			break;
-		case Delete:
+		/*case Delete:
 			bttntypOK = new Button("Delete");
 			grdpn.add(bttntypOK, 1, 2);
-			break;		
+			break;	*/	
 		}
 		bttntypOK.setDefaultButton(true);
 		bttntypOK.setOnAction(new EventHandler<ActionEvent>() {
@@ -427,8 +504,13 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	 * Shows the modify survey screen.
 	 *
 	 * @param type The type of edit to be done, this could be add or delete or edit
+	 * @throws NotBoundException 
+	 * @throws RemoteException 
+	 * @throws IncorrectFormatException 
+	 * @throws ServerNotBoundException 
+	 * @throws ServerOfflineException 
 	 */
-	private void showSurveyScreen(TypeOfEdit type){
+	private void showSurveyScreen(TypeOfEdit type) {
 		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
 			anchrpnCoordinatorDetails.getChildren().remove(i);
 		TextField txtfldSurveyID = new TextField();
@@ -439,15 +521,15 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 		grdpn.add(txtfldSurveyID, 1, 1);
 		switch(type){
 		case Add:
-			bttntypOK = new Button("Create");
+			bttntypOK = new Button("Add");
 			txtfldSurveyName.setPromptText("Survey name");
 			grdpn.add(txtfldSurveyName, 1, 2);
 			grdpn.add(bttntypOK, 1, 4);
 			break;
-		case Delete:
+		/*case Delete:
 			bttntypOK = new Button("Delete");
 			grdpn.add(bttntypOK, 1, 2);
-			break;	
+			break;*/	
 			
 		case Edit:
 		    TableView table = new TableView();
@@ -469,7 +551,13 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 					return new ReadOnlyObjectWrapper<String>(survey.getValue().status.toString());
 				}
 			});
-		    
+		    CtSurvey survey = new CtSurvey();
+		    survey.init(new DtSurveyID(new PtString("1")),new PtString("Test survey 1"), EtSurveyStatus.open);
+		    CtSurvey survey1 = new CtSurvey();
+		    survey1.init(new DtSurveyID(new PtString("2")),new PtString("Test survey 2"), EtSurveyStatus.closed);
+		    table.getItems().add(survey);
+		    table.getItems().add(survey1);
+
 		    table.getColumns().addAll(surveyIdCol,surveyNameCol,surveyStatusCol);
 		    
 		    grdpn.add(table, 1, 5);

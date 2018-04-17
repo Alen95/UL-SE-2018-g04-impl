@@ -28,6 +28,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCo
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtHuman;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtState;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAlertID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtComment;
@@ -418,6 +419,13 @@ public interface IcrashSystem extends Remote {
 	 * @return The success of the method
 	 * @throws RemoteException Thrown if the server is offline
 	 */
-	public PtBoolean oeAddAnswer(DtAnswerID aDtAnswerID, PtString aAnswer, DtQuestionID aDtQuestionID)throws RemoteException; 
+	public PtBoolean oeAddAnswer(DtAnswerID aDtAnswerID, PtString aAnswer, DtQuestionID aDtQuestionID)throws RemoteException;
+
+	/**
+	 * Retrieve all the surveys as list of CtSurvey from the database
+	 * @return list of CtSurvey
+	 * @throws RemoteException Thrown if the server is offline
+	 */
+	public List<CtSurvey> oeGetSurveys() throws RemoteException; 
 
 }

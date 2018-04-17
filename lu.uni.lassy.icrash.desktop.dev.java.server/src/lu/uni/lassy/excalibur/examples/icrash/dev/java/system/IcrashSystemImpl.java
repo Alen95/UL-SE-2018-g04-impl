@@ -1478,5 +1478,31 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 
 		return new PtBoolean(true);
 	}
+
+	@Override
+	public List<CtSurvey> oeGetSurveys() throws RemoteException {
+		List<CtSurvey> surveys = null;
+		try {
+			//PreP1
+			isSystemStarted();
+			//PreP2
+			isAdminLoggedIn();
+			Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(), RmiUtils.getInstance().getPort());
+			IcrashEnvironment env = (IcrashEnvironment) registry
+					.lookup("iCrashEnvironment");;
+
+			//PostF2
+			surveys = DbSurveys.getSurveys();
+
+
+			//PostF5
+			ActAdministrator admin = (ActAdministrator) currentRequestingAuthenticatedActor;
+			
+		} catch (Exception ex) {
+			log.error("Exception in oeGetSurveys..." + ex);
+		}
+
+		return surveys;
+	}
 	
 }

@@ -13,6 +13,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSu
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 
 public class DbSurveys extends DbAbstract{
 
@@ -172,9 +173,9 @@ public class DbSurveys extends DbAbstract{
 	 *
 	 * @return list of all surveys
 	 */
-	static public List<String> getSurveys(){
+	static public List<CtSurvey> getSurveys(){
 		
-		List<String> surveys = new ArrayList<String>();
+		List<CtSurvey> surveys = new ArrayList<CtSurvey>();
 		
 		try {
 			conn = DriverManager.getConnection(url+dbName,userName,password);
@@ -184,13 +185,15 @@ public class DbSurveys extends DbAbstract{
 			//Select
 			
 			try{
-				String sql = "SELECT name FROM "+ dbName + ".surveys ";
+				String sql = "SELECT * FROM "+ dbName + ".surveys ";
 
 				PreparedStatement statement = conn.prepareStatement(sql);
 				ResultSet  res = statement.executeQuery(sql);
 				
 				while(res.next()) {
-					surveys.add(res.getString(1));
+					CtSurvey survey = new CtSurvey();
+					survey.init(new DtSurveyID(new PtString(res.getString("id"))),new PtString(res.getString("name")), EtSurveyStatus.valueOf(res.getString("status").toLowerCase()));
+					surveys.add(survey);
 				}
 								
 			}

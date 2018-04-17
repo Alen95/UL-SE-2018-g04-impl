@@ -14,8 +14,11 @@ package lu.uni.lassy.excalibur.examples.icrash.dev.model.actors;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.List;
+
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActProxyAdministrator;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
@@ -167,5 +170,12 @@ public class ActProxyAdministratorImpl extends ActProxyAuthenticatedImpl impleme
 		log.info("message ActAdministrator.ieAnswerAdded received from system");
 		listOfMessages.add(new Message(MessageType.ieAnswerAdded));
 		return new PtBoolean(true);
+	}
+
+	public List<CtSurvey> oeGetSurveys() throws RemoteException, NotBoundException {
+		if(getServerSideActor() !=null)
+			return ((ActAdministrator) getServerSideActor()).oeGetSurveys();
+		else
+			return null;
 	}
 }

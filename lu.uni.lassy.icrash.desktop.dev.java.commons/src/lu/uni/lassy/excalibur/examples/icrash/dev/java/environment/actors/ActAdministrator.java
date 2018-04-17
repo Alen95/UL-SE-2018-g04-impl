@@ -14,7 +14,9 @@ package lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.List;
 
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCoordinatorID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtLogin;
@@ -152,5 +154,13 @@ public interface ActAdministrator extends ActAuthenticated {
 	 * @return The success of the method
 	 * @throws RemoteException Thrown if the server is offline
 	 */
-	public PtBoolean ieAnswerAdded() throws RemoteException;	
+	public PtBoolean ieAnswerAdded() throws RemoteException;
+
+	/**
+	 * Get all surveys from the Database as list of CtSurvey
+	 * @return List of CtSurvey
+	 * @throws RemoteException Thrown if the server is offline
+	 * @throws NotBoundException Thrown if the server has not been bound correctly in RMI settings
+	 */
+	public List<CtSurvey> oeGetSurveys() throws RemoteException,NotBoundException;	
 }

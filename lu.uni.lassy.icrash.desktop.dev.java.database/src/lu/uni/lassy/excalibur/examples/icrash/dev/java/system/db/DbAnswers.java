@@ -58,7 +58,7 @@ public class DbAnswers extends DbAbstract{
 	}
 	
 	/**
-	 * Gets a survey's ID from the database from the questionid provided.
+	 * Gets a all answers from the database whose question id is the one provided.
 	 *
 	 * @param questionId The ID of the question
 	 * @return The ID of the survey that was retrieved from the database
