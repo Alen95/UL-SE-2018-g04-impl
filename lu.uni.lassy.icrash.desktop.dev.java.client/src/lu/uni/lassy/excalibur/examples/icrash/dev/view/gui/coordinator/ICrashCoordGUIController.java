@@ -14,6 +14,7 @@ package lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.coordinator;
 import java.net.URL;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
@@ -27,12 +28,18 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActCoo
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActProxyAuthenticated.UserType;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIsActor;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAlert;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtQuestion;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtAlertStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message;
+import lu.uni.lassy.excalibur.examples.icrash.dev.model.Server;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.actors.ActProxyCoordinatorImpl;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.abstractgui.AbstractAuthGUIController;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -83,6 +90,10 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
     /** The passwordfield for entering in the password for logging on. */
     @FXML
     private PasswordField psswrdfldCoordLogonPassword;
+    
+    /**The textfield for entering in the answer id*/
+    @FXML
+    private TextField txtfldAnswerID;
 
     /** The button that allows a user to initiate the logon function. */
     @FXML
@@ -115,6 +126,10 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
     /** The tab containing the controls for crises. */
     @FXML
     private Tab tbCoordCrisis;
+    
+    /** The tab containing the controls for surveys. */
+    @FXML
+    private Tab tbCoordSurveys;
 
     /** The button that allows a user to handle a crisis. */
     @FXML
@@ -148,6 +163,18 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
     @FXML
     private Button bttnCoordLogoff;
 
+    /**The button that allows the coordinator to select an answer**/
+    @FXML
+    private Button bttnSelectAnswer;
+    
+    /** The tableview of the answers the user has retrieved from the system. */
+    @FXML
+    private TableView<CtAnswer> tblvwAnswers;
+    
+    /** The tableview of the answers the user has retrieved from the system. */
+    @FXML
+    private TableView<CtQuestion> tblvwQuestions;
+    
     /**
      * Button event that deals with changing the status of a crisis
      *
@@ -228,10 +255,22 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
     	validateAlert();
     }
     
+    /**
+     * Button event that deals with selecting an answer
+     *
+     * @param event The event type fired, we do not need it's details
+     * @throws NotBoundException 
+     * @throws RemoteException 
+     */
+    @FXML
+    void bttnSelectAnswer_OnClick(ActionEvent event)  {
+    		selectAnswer();
+    }
+    
     /*
      * These are other classes accessed by this controller
      */
-	
+
 	/** The user controller, for this GUI it's the coordinator controller and allows access to coordinator functions like reporting on crises. */
 	private CoordinatorController userController;
 	
@@ -251,8 +290,37 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 		setUpMessageTables(tblvwCoordMessages);
 		setUpCrisesTables(tblvwCrisis);
 		setUpAlertTables(tblvwAlerts);
+		try {
+			setUpAnswerAndQuestionTables(tblvwAnswers,tblvwQuestions);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
 		cmbbxCrisisStatus.setItems( FXCollections.observableArrayList( EtCrisisStatus.values()));
 		cmbbxAlertStatus.setItems( FXCollections.observableArrayList( EtAlertStatus.values()));
+		
+	}
+
+	
+	private void selectAnswer() {
+		CtAnswer answer = (CtAnswer)getObjectFromTableView(tblvwAnswers);
+		if (answer != null){
+			try {
+				if (!userController.selectAnswer(answer.id.value.getValue()).getValue())
+					showWarningMessage("Unable to handle answer", "Unable to select, please try again");
+			} catch (ServerOfflineException | ServerNotBoundException e) {
+				showServerOffLineMessage(e);
+			}
+		}
+		try {
+			updateAnswers(tblvwAnswers);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+		
 	}
 	
 	/**
@@ -294,6 +362,8 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 		}
 		populateCrisis();
 	}
+	
+	
 	
 	/**
 	 * Runs the function that will allow the current user to close the selected crisis.
@@ -534,6 +604,16 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 					populateAlerts();
 				else if (newValue == tbCoordCrisis)
 					populateCrisis();
+				else if (newValue == tbCoordSurveys) {
+					try {
+						updateAnswers(tblvwAnswers);
+						updateQuestions(tblvwQuestions);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					} catch (NotBoundException e) {
+						e.printStackTrace();
+					}
+				}
 			}
 		});
 		logonShowPanes(false);

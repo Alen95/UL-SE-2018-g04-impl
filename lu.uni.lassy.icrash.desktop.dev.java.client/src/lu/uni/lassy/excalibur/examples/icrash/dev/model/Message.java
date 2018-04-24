@@ -55,7 +55,8 @@ public class Message {
 		ieQuestionAdded, 
 		
 		/**The ie answer added*/
-		ieAnswerAdded
+		ieAnswerAdded, 
+		ieAnswerSelected
 	}
 	
 	/**

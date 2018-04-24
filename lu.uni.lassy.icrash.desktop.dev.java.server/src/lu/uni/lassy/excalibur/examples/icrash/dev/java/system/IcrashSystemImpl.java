@@ -114,6 +114,9 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 	/**  A hashtable of the alerts in the system, stored by their ID as a key. */
 	Hashtable<String, CtAlert> cmpSystemCtAlert = new Hashtable<String, CtAlert>();
 	
+	Hashtable<String, CtAnswer> cmpSystemCtAnswer = new Hashtable<String, CtAnswer>();
+
+	
 	/**  A hashtable of the crises in the system, stored by their ID as a key. */
 	Hashtable<String, CtCrisis> cmpSystemCtCrisis = new Hashtable<String, CtCrisis>();
 	
@@ -141,6 +144,7 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 	
 	/**  A hashtable of the joint humans and Actor com companies in the system, stored by the human as a key. */
 	Hashtable<CtHuman, ActComCompany> assCtHumanActComCompany = new Hashtable<CtHuman, ActComCompany>();
+	
 	
 	/** The logger user by the system to print information to the console. */
 	private Logger log = Log4JUtils.getInstance().getLogger();
@@ -1492,7 +1496,7 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 					.lookup("iCrashEnvironment");;
 
 			//PostF2
-			surveys = DbSurveys.getSurveys();
+			surveys = DbSurveys.getAllSurveys();
 
 
 			//PostF5
@@ -1502,6 +1506,106 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			log.error("Exception in oeGetSurveys..." + ex);
 		}
 
+		return surveys;
+	}
+
+	@Override
+	public PtBoolean oeGetAnswers(DtQuestionID questionID) throws RemoteException {
+		try{
+			//PreP1
+			isSystemStarted();
+			//PreP2
+			isUserLoggedIn();
+			if (currentRequestingAuthenticatedActor instanceof ActCoordinator) {
+				ActCoordinator theActCoordinator = (ActCoordinator) currentRequestingAuthenticatedActor;
+	
+				//PostF1
+				List<CtAnswer> answers = new ArrayList<>();
+				answers = DbAnswers.getAnswers(questionID.value.getValue());
+				for(CtAnswer answer : answers) {
+					cmpSystemCtAnswer.put(answer.id.value.getValue(), answer);
+				}
+			}
+		}
+		catch (Exception e){
+			log.error("Exception in oeGetAnswers..." + e);
+		}
+		return new PtBoolean(false);
+	}
+
+	@Override
+	public ArrayList<CtAnswer> getAllAnswers() {
+		ArrayList<CtAnswer> answers = new ArrayList<>();
+		try{
+		//PreP1
+		isSystemStarted();
+		//PreP2
+		isUserLoggedIn();
+			//PostF1
+			answers = DbAnswers.getAllAnswers();
+		}
+		catch (Exception e){
+			log.error("Exception in oeGetAllAnswers..." + e);
+		}
+		return answers;
+	}
+	
+	@Override
+	public ArrayList<CtQuestion> getAllQuestions() {
+		ArrayList<CtQuestion> questions = new ArrayList<>();
+		try{
+		//PreP1
+		isSystemStarted();
+		//PreP2
+		isUserLoggedIn();
+			//PostF1
+			questions = DbQuestions.getAllQuestions();
+		}
+		catch (Exception e){
+			log.error("Exception in oeGetAllQuestions..." + e);
+		}
+		return questions;
+	}
+
+	@Override
+	public PtBoolean oeSelectAnswer(String id) throws RemoteException {
+		try {
+			//PreP1
+			isSystemStarted();
+			//PreP2
+			isAdminLoggedIn();
+			Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(), RmiUtils.getInstance().getPort());
+			IcrashEnvironment env = (IcrashEnvironment) registry
+					.lookup("iCrashEnvironment");;
+
+			//PostF2
+			DbAnswers.selectAnswer(id);
+
+			//PostF5
+			ActCoordinator coord= (ActCoordinator) currentRequestingAuthenticatedActor;
+			coord.ieAnswerSelected();
+			
+		} catch (Exception ex) {
+			log.error("Exception in oeSelectAnswer..." + ex);
+		}
+
+		return new PtBoolean(true);
+	}
+
+	@Override
+	public ArrayList<CtSurvey> getAllSurveys() throws RemoteException {
+		ArrayList<CtSurvey> surveys = new ArrayList<>();
+		try{
+		//PreP1
+		isSystemStarted();
+		//PreP2
+		isUserLoggedIn();
+			//PostF1
+			surveys = DbSurveys.getAllSurveys();
+		}
+		catch (Exception e){
+			log.error("Exception in oeGetAllSurveys..." + e);
+		}
 		return surveys;
 	}
 	

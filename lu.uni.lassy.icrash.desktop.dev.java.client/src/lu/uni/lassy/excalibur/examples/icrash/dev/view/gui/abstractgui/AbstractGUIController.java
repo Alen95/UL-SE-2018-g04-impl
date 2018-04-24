@@ -11,6 +11,8 @@
  *     Thomas Mortimer - Updated client to MVC and added new design patterns
  ******************************************************************************/
 package lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.abstractgui;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -21,6 +23,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
@@ -43,16 +46,22 @@ import javafx.util.StringConverter;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.design.JIntIsActor;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAlert;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCoordinator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtHuman;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtQuestion;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtState;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtAlertStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtDate;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtTime;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message;
+import lu.uni.lassy.excalibur.examples.icrash.dev.model.Server;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message.MessageType;
 import lu.uni.lassy.excalibur.examples.icrash.dev.controller.exceptions.IncorrectFormatException;
 
@@ -506,6 +515,70 @@ public abstract class AbstractGUIController implements Initializable {
 	}
 	
 	/**
+	 * Sets up the answers tableviews with the correct columns
+	 * @param tblvwAnswers2
+	 * @throws NotBoundException 
+	 * @throws RemoteException 
+	 */
+	public void setUpAnswerAndQuestionTables(TableView<CtAnswer> tblvwa,TableView<CtQuestion> tblvwq) throws RemoteException, NotBoundException {
+	    TableColumn<CtAnswer,String> answerNameCol = new TableColumn<CtAnswer,String>("answer");
+	    TableColumn<CtAnswer,String> answerIdCol = new TableColumn<CtAnswer,String>("id");
+	    TableColumn<CtAnswer,String> aquestionIdCol = new TableColumn<CtAnswer,String>("question_id");
+	    TableColumn<CtQuestion,String> questionIdCol = new TableColumn<CtQuestion,String>("id");
+	    TableColumn<CtQuestion,String> questionNameCol = new TableColumn<CtQuestion,String>("question");
+
+	    answerNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().answer.getValue());
+			}
+		});
+	    answerIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().id.value.getValue());
+			}
+		});
+	    aquestionIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().question_id.value.getValue());
+			}
+		});
+	    questionIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().id.value.getValue());
+			}
+		});
+	    questionNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().question.getValue());
+			}
+		});
+	    tblvwa.getColumns().addAll(answerIdCol,answerNameCol,aquestionIdCol);
+	    tblvwq.getColumns().addAll(questionIdCol,questionNameCol);
+		setColumnsSameWidth(tblvwa);
+		setColumnsSameWidth(tblvwq);
+		Server server = Server.getInstance();
+		ArrayList<CtAnswer> answers = server.sys().getAllAnswers();
+		ArrayList<CtQuestion> questions = server.sys().getAllQuestions();
+		tblvwa.setItems(FXCollections.observableArrayList( answers));
+		tblvwq.setItems(FXCollections.observableArrayList( questions));
+
+		
+	}
+	
+	public void updateAnswers(TableView<CtAnswer> tblvw) throws RemoteException, NotBoundException {
+		Server server = Server.getInstance();
+		ArrayList<CtAnswer> answers = server.sys().getAllAnswers();
+		tblvw.setItems(FXCollections.observableArrayList( answers));
+	}
+	
+	public void updateQuestions(TableView<CtQuestion> tblvw) throws RemoteException,NotBoundException{
+		Server server = Server.getInstance();
+		ArrayList<CtQuestion> questions = server.sys().getAllQuestions();
+		tblvw.setItems(FXCollections.observableArrayList( questions));
+
+	}
+	
+	/**
 	 * Sets up the human tableviews with the correct columns.
 	 *
 	 * @param tblvw The tableview to add the columns to
@@ -640,7 +713,7 @@ public abstract class AbstractGUIController implements Initializable {
 	 *
 	 * @param tblvw The tableview to apply the property to
 	 */
-	private void setColumnsSameWidth(TableView<?> tblvw){
+	protected void setColumnsSameWidth(TableView<?> tblvw){
 		for(TableColumn<?,?> col : tblvw.getColumns()){
 			col.prefWidthProperty().bind(tblvw.widthProperty().divide( tblvw.getColumns().size()));
 		}

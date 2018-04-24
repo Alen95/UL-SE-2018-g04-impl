@@ -39,6 +39,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.utils.Log4JUtils;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.Message;
+import lu.uni.lassy.excalibur.examples.icrash.dev.model.Server;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.abstractgui.AbstractAuthGUIController;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.coordinator.CreateICrashCoordGUI;
 import javafx.scene.layout.GridPane;
@@ -314,6 +315,8 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	    TableColumn<CtAnswer,String> answerNameCol = new TableColumn<CtAnswer,String>("answer");
 	    TableColumn<CtAnswer,String> answerIdCol = new TableColumn<CtAnswer,String>("id");
 	    TableColumn<CtAnswer,String> questionIdCol = new TableColumn<CtAnswer,String>("id_question");
+	    TableColumn<CtAnswer,String> count = new TableColumn<CtAnswer,String>("count");
+
 	    answerNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
 			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
 				return new ReadOnlyObjectWrapper<String>(answer.getValue().answer.getValue());
@@ -329,18 +332,20 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 				return new ReadOnlyObjectWrapper<String>(answer.getValue().question_id.toString());
 			}
 		});
-	    CtAnswer answer1 = new CtAnswer();
-	    CtAnswer answer2 = new CtAnswer();
-	    CtAnswer answer3 = new CtAnswer();
-	    answer1.init(new DtAnswerID(new PtString("1")), new PtString("Test answer 1"), new DtQuestionID(new PtString("1")), 0);
-	    answer2.init(new DtAnswerID(new PtString("2")), new PtString("Test answer 2"), new DtQuestionID(new PtString("1")), 0);
-	    answer3.init(new DtAnswerID(new PtString("3")), new PtString("Test answer 3"), new DtQuestionID(new PtString("2")), 0);
-
-	    table.getItems().add(answer1);
-	    table.getItems().add(answer2);
-	    table.getItems().add(answer3);
-
-	    table.getColumns().addAll(answerIdCol,answerNameCol,questionIdCol);
+	    count.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(String.valueOf(answer.getValue().count));
+			}
+		});
+	    table.getColumns().addAll(answerIdCol,answerNameCol,questionIdCol,count);
+		setColumnsSameWidth(table);
+	    try {
+			updateAnswers(table);
+		} catch (RemoteException e1) {
+			e1.printStackTrace();
+		} catch (NotBoundException e1) {
+			e1.printStackTrace();
+		}
 	    grdpn.add(table, 1, 5);
 		switch(type){
 		case Add:
@@ -367,6 +372,13 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 						case Add:
 							if (userController.oeAddAnswer(txtfldAnswerID.getText(), txtfldAnswer.getText(), txtfldQuestionID.getText()).getValue()){
 								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+								try {
+									updateAnswers(table);
+								} catch (RemoteException e) {
+									e.printStackTrace();
+								} catch (NotBoundException e) {
+									e.printStackTrace();
+								}
 							}
 							else
 								showErrorMessage("Unable to add Answer", "An error occured when adding the Answer");
@@ -395,6 +407,42 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 		AnchorPane.setBottomAnchor(grdpn, 0.0);
 		AnchorPane.setRightAnchor(grdpn, 0.0);
 		txtfldAnswerID.requestFocus();
+	}
+	
+	public void updateAnswersTable(TableView table) {
+		Server server = Server.getInstance();
+		try {
+			ArrayList<CtAnswer> answers = server.sys().getAllAnswers();
+			table.setItems(FXCollections.observableArrayList( answers));
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateQuestionsTable(TableView table) {
+		Server server = Server.getInstance();
+		try {
+			ArrayList<CtQuestion> questions = server.sys().getAllQuestions();
+			table.setItems(FXCollections.observableArrayList( questions));
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void updateSurveysTable(TableView table) {
+		Server server = Server.getInstance();
+		try {
+			ArrayList<CtSurvey> surveys = server.sys().getAllSurveys();
+			table.setItems(FXCollections.observableArrayList(surveys));
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -433,17 +481,15 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 				return new ReadOnlyObjectWrapper<String>(question.getValue().id.toString());
 			}
 		});
-	    CtQuestion question1 = new CtQuestion();
-	    question1.init(new DtQuestionID(new PtString("1")), new PtString("Test question 1"), new DtSurveyID(new PtString("1")));
-	    CtQuestion question2 = new CtQuestion();
-	    question2.init(new DtQuestionID(new PtString("2")), new PtString("Test question 2"), new DtSurveyID(new PtString("1")));
-	    CtQuestion question3 = new CtQuestion();
-	    question3.init(new DtQuestionID(new PtString("3")), new PtString("Test question 3"), new DtSurveyID(new PtString("1")));
-	    table.getItems().add(question1);
-	    table.getItems().add(question2);
-	    table.getItems().add(question3);
-
 	    table.getColumns().addAll(QuestionIdCol,QuestionNameCol,surveyIdCol);
+	    setColumnsSameWidth(table);
+	    try {
+			updateQuestions(table);
+		} catch (RemoteException e1) {
+			e1.printStackTrace();
+		} catch (NotBoundException e1) {
+			e1.printStackTrace();
+		}
 	    grdpn.add(table, 1, 5);
 		switch(type){
 		case Add:
@@ -470,6 +516,13 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 						case Add:
 							if (userController.oeAddQuestion(txtfldQuestionID.getText(), txtfldQuestion.getText(), txtfldSurveyID.getText()).getValue()){
 								anchrpnCoordinatorDetails.getChildren().remove(grdpn);
+								try {
+									updateQuestions(table);
+								} catch (RemoteException e) {
+									e.printStackTrace();
+								} catch (NotBoundException e) {
+									e.printStackTrace();
+								}
 							}
 							else
 								showErrorMessage("Unable to add Question", "An error occured when adding the Question");
@@ -504,11 +557,6 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 	 * Shows the modify survey screen.
 	 *
 	 * @param type The type of edit to be done, this could be add or delete or edit
-	 * @throws NotBoundException 
-	 * @throws RemoteException 
-	 * @throws IncorrectFormatException 
-	 * @throws ServerNotBoundException 
-	 * @throws ServerOfflineException 
 	 */
 	private void showSurveyScreen(TypeOfEdit type) {
 		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
@@ -551,15 +599,9 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 					return new ReadOnlyObjectWrapper<String>(survey.getValue().status.toString());
 				}
 			});
-		    CtSurvey survey = new CtSurvey();
-		    survey.init(new DtSurveyID(new PtString("1")),new PtString("Test survey 1"), EtSurveyStatus.open);
-		    CtSurvey survey1 = new CtSurvey();
-		    survey1.init(new DtSurveyID(new PtString("2")),new PtString("Test survey 2"), EtSurveyStatus.closed);
-		    table.getItems().add(survey);
-		    table.getItems().add(survey1);
-
 		    table.getColumns().addAll(surveyIdCol,surveyNameCol,surveyStatusCol);
-		    
+		    setColumnsSameWidth(table);
+		    updateSurveysTable(table);
 		    grdpn.add(table, 1, 5);
 		    bttntypOK = new Button("Edit");
 			txtfldSurveyName.setPromptText("Survey status");

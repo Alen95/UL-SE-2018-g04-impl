@@ -101,5 +101,78 @@ public class DbAnswers extends DbAbstract{
 		return answers;
 
 	}
+	
+	/**
+	 * Gets a all answers from the database
+	 *
+	 * @return List of the answers retrieved from the database
+	 */
+	static public ArrayList<CtAnswer> getAllAnswers(){
+		
+		ArrayList<CtAnswer> answers = new ArrayList<CtAnswer>();
+		
+		try {
+			conn = DriverManager.getConnection(url+dbName,userName,password);
+			log.debug("Connected to the database");
+
+			/********************/
+			//Select
+			
+			try{
+				String sql = "SELECT * FROM "+ dbName + ".answers";
+
+				PreparedStatement statement = conn.prepareStatement(sql);
+				ResultSet  res = statement.executeQuery(sql);
+				
+				while(res.next()) {
+					CtAnswer answer = new CtAnswer();
+					answer.init(new DtAnswerID(new PtString(res.getString("id"))), new PtString(res.getString("answer")), new DtQuestionID(new PtString(res.getString("id_question"))),res.getInt("count"));
+					answers.add(answer);
+				}
+								
+			}
+			catch (SQLException s){
+				log.error("SQL statement is not executed! "+s);
+			}
+			conn.close();
+			log.debug("Disconnected from database");
+			
+			
+		} catch (Exception e) {
+			logException(e);
+		}
+				
+		return answers;
+
+	}
+
+	public static void selectAnswer(String id) {
+
+		try {
+			conn = DriverManager.getConnection(url+dbName,userName,password);
+			log.debug("Connected to the database");
+
+			/********************/
+			//Insert
+			
+			try{
+				Statement st = conn.createStatement();
+	
+				log.debug("[DATABASE]-Select Answer");
+				int val = st.executeUpdate("UPDATE "+ dbName+ ".answers SET count=count+1 WHERE id='"+id+"'");
+				
+				log.debug(val + " row affected");
+			}
+			catch (SQLException s){
+				log.error("SQL statement is not executed! "+s);
+			}
+
+	
+			conn.close();
+			log.debug("Disconnected from database");
+		} catch (Exception e) {
+			logException(e);
+		}		
+	}
 
 }

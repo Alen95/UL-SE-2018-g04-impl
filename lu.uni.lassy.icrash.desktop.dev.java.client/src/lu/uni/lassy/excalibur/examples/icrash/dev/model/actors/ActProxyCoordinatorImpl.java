@@ -19,10 +19,12 @@ import java.util.Hashtable;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActCoordinator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActProxyCoordinator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAlert;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAlertID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtComment;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtCrisisID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtAlertStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtCrisisType;
@@ -197,6 +199,9 @@ public class ActProxyCoordinatorImpl extends ActProxyAuthenticatedImpl
 	/** The list of class type alerts this user has retrieved from the server */
 	private Hashtable<String, CtAlert> _listOfCtAlerts = new Hashtable<String, CtAlert>();
 	
+	/** The list of class type answer this user has retrieved from the server */
+	private Hashtable<String, CtAnswer> _listOfCtAnswers = new Hashtable<String, CtAnswer>();
+	
 	/** The observable map of class type crises this user has retrieved from the server. 
 	 * Being observable, listeners can be attached to it to force the an action once updated*/
 	public ObservableMap<String, CtCrisis> MapOfCtCrisis = FXCollections.observableMap(_listOfCtCrisis);
@@ -204,6 +209,10 @@ public class ActProxyCoordinatorImpl extends ActProxyAuthenticatedImpl
 	/** The observable map of class type alerts this user has retrieved from the server. 
 	 * Being observable, listeners can be attached to it to force the an action once updated*/
 	public ObservableMap<String, CtAlert> MapOfCtAlerts = FXCollections.observableMap(_listOfCtAlerts);
+	
+	/** The observable map of class type answer this user has retrieved from the server. 
+	 * Being observable, listeners can be attached to it to force the an action once updated*/
+	public ObservableMap<String, CtAnswer> MapOfCtAnswers = FXCollections.observableMap(_listOfCtAnswers);
 
 	/* (non-Javadoc)
 	 * @see lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActProxyCoordinator#ieSendAnAlert(lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAlert)
@@ -227,6 +236,35 @@ public class ActProxyCoordinatorImpl extends ActProxyAuthenticatedImpl
 	@Override
 	public PtBoolean oeLogout() throws RemoteException, NotBoundException {
 		return super.oeLogout();
+	}
+
+	@Override
+	public PtBoolean oeGetAnswers(DtQuestionID questionID) throws RemoteException, NotBoundException {
+		if (getServerSideActor() != null){
+			MapOfCtAnswers.clear();
+			return ((ActCoordinator) getServerSideActor())
+					.oeGetAnswers(questionID);
+		}
+		else
+			return new PtBoolean(false);
+	}
+
+	@Override
+	public PtBoolean oeSelectAnswer(String id) throws RemoteException, NotBoundException {
+		if (getServerSideActor() != null){
+			return ((ActCoordinator) getServerSideActor())
+					.oeSelectAnswer(id);
+		}
+		else
+			return new PtBoolean(false);
+	}
+
+	@Override
+	public PtBoolean ieAnswerSelected() throws RemoteException {
+		Logger log = Log4JUtils.getInstance().getLogger();
+		log.info("message ActCoordinator.ieAnswerSelected received from system");
+		listOfMessages.add(new Message(MessageType.ieAnswerSelected));
+		return new PtBoolean(true);
 	}
 
 }

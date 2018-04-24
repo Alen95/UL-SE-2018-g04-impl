@@ -8,11 +8,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCoordinator;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtQuestion;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtSurveyID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtSurveyStatus;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 
 public class DbQuestions extends DbAbstract{
 
@@ -129,4 +134,49 @@ public class DbQuestions extends DbAbstract{
 			logException(e);
 		}
 	}
+	
+	/**
+	 * Gets a all questions from the database
+	 *
+	 * @return List of the questions retrieved from the database
+	 */
+	static public ArrayList<CtQuestion> getAllQuestions(){
+		
+		ArrayList<CtQuestion> questions = new ArrayList<CtQuestion>();
+		
+		try {
+			conn = DriverManager.getConnection(url+dbName,userName,password);
+			log.debug("Connected to the database");
+
+			/********************/
+			//Select
+			
+			try{
+				String sql = "SELECT * FROM "+ dbName + ".questions ";
+
+				PreparedStatement statement = conn.prepareStatement(sql);
+				ResultSet  res = statement.executeQuery(sql);
+				
+				while(res.next()) {
+					CtQuestion question = new CtQuestion();
+					question.init(new DtQuestionID(new PtString(res.getString("id"))), new PtString(res.getString("question")), new DtSurveyID(new PtString(res.getString("id_survey"))));
+					questions.add(question);
+				}
+								
+			}
+			catch (SQLException s){
+				log.error("SQL statement is not executed! "+s);
+			}
+			conn.close();
+			log.debug("Disconnected from database");
+			
+			
+		} catch (Exception e) {
+			logException(e);
+		}
+				
+		return questions;
+
+	}
+
 }

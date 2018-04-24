@@ -95,9 +95,8 @@ public class AdminController extends AbstractUserController {
 	 * @return Returns a PtBoolean true if the user was created, otherwise will return false
 	 * @throws ServerOfflineException is an error that is thrown when the server is offline or not reachable
 	 * @throws ServerNotBoundException is only thrown when attempting to access a server which has no current binding. This shouldn't happen, but you never know!
-	 * @throws IncorrectFormatException is thrown when a Dt/Et information type does not match the is() method specified in the specification
 	 */
-	public PtBoolean oeCreateSurvey(String surveyID, String name, String status) throws ServerOfflineException, ServerNotBoundException, IncorrectFormatException{
+	public PtBoolean oeCreateSurvey(String surveyID, String name, String status) throws ServerOfflineException, ServerNotBoundException{
 		if (getUserType() == UserType.Admin){
 			ActProxyAdministratorImpl actorAdmin = (ActProxyAdministratorImpl)getAuth();
 			DtSurveyID aDtSurveyID = new DtSurveyID(new PtString(surveyID));

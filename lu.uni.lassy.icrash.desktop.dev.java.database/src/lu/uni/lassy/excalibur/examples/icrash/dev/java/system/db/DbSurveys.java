@@ -173,9 +173,9 @@ public class DbSurveys extends DbAbstract{
 	 *
 	 * @return list of all surveys
 	 */
-	static public List<CtSurvey> getSurveys(){
+	static public ArrayList<CtSurvey> getAllSurveys(){
 		
-		List<CtSurvey> surveys = new ArrayList<CtSurvey>();
+		ArrayList<CtSurvey> surveys = new ArrayList<CtSurvey>();
 		
 		try {
 			conn = DriverManager.getConnection(url+dbName,userName,password);

@@ -23,10 +23,12 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActCom
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.environment.actors.ActCoordinator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAdministrator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAlert;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAuthenticated;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCoordinator;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtHuman;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtQuestion;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtState;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAlertID;
@@ -426,6 +428,16 @@ public interface IcrashSystem extends Remote {
 	 * @return list of CtSurvey
 	 * @throws RemoteException Thrown if the server is offline
 	 */
-	public List<CtSurvey> oeGetSurveys() throws RemoteException; 
+	public List<CtSurvey> oeGetSurveys() throws RemoteException;
+
+	public PtBoolean oeGetAnswers(DtQuestionID questionID) throws RemoteException;
+
+	public ArrayList<CtAnswer> getAllAnswers() throws RemoteException;
+
+	public ArrayList<CtQuestion> getAllQuestions() throws RemoteException;
+
+	public PtBoolean oeSelectAnswer(String id) throws RemoteException;
+
+	public ArrayList<CtSurvey> getAllSurveys() throws RemoteException; 
 
 }

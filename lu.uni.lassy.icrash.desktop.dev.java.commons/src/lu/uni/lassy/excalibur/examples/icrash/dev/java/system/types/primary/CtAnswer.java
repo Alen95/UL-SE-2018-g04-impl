@@ -1,11 +1,16 @@
 package lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary;
 
+import java.io.Serializable;
+
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.DtString;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtBoolean;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.types.stdlib.PtString;
 
-public class CtAnswer{
+public class CtAnswer implements Serializable{
 
+	/** The Constant serialVersionUID. */
+	private static final long serialVersionUID = 227L;
+	
 	/**ID of the answer*/
 	public DtAnswerID id;
 	
