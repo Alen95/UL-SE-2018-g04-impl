@@ -210,4 +210,44 @@ public class DbSurveys extends DbAbstract{
 				
 		return surveys;
 	}
+	
+	/**
+	 * Returns the open survey from the database
+	 *
+	 * @return Survey object 
+	 */
+	static public CtSurvey getOpenSurvey(){
+		CtSurvey survey = new CtSurvey();
+		
+		try {
+			conn = DriverManager.getConnection(url+dbName,userName,password);
+			log.debug("Connected to the database");
+
+			/********************/
+			//Select
+			
+			try{
+				String sql = "SELECT * FROM "+ dbName + ".surveys WHERE status= open ";
+
+				PreparedStatement statement = conn.prepareStatement(sql);
+				ResultSet  res = statement.executeQuery(sql);
+				survey.init(new DtSurveyID(new PtString(res.getString("id"))),new PtString(res.getString("name")), EtSurveyStatus.valueOf(res.getString("status").toLowerCase()));
+
+								
+			}
+			catch (SQLException s){
+				log.error("SQL statement is not executed! "+s);
+			}
+			conn.close();
+			log.debug("Disconnected from database");
+			
+			
+		} catch (Exception e) {
+			logException(e);
+		}
+				
+		return survey;
+	}
+	
+	
 }

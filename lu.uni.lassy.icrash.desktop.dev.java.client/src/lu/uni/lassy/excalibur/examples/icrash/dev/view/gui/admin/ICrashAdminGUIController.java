@@ -55,6 +55,7 @@ import javafx.event.EventHandler;
  */
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -136,6 +137,10 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     /**The button that shows the controls for adding a new answer*/
     @FXML
     private Button bttnBottomAdminAddAnswer;
+    
+    /**The button that shows the survey results**/
+    @FXML
+    private Button bttnBottomAdminShowSurveyResult;
     /**
      * The button event that will show the controls for adding a coordinator
      *
@@ -145,7 +150,17 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
     void bttnBottomAdminCoordinatorAddACoordinator_OnClick(ActionEvent event) {
     	showCoordinatorScreen(TypeOfEdit.Add);
     }
-
+    
+    /**
+     * The button event that will show the survey results
+     * @param event The event type thrown, we do not need this, but it must be specified
+     * @throws NotBoundException 
+     * @throws RemoteException 
+     */
+    @FXML
+    void bttnBottomAdminShowSurveyResult_OnClick(ActionEvent event) throws RemoteException, NotBoundException {
+    		showSurveyResult();
+    }
     /**
      * The button event that will show the controls for deleting a coordinator
      *
@@ -293,6 +308,165 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 		setUpMessageTables(tblvwAdminMessages);
 	}
 
+	private void showSurveyResult() throws RemoteException, NotBoundException {
+		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
+			anchrpnCoordinatorDetails.getChildren().remove(i);
+		
+		GridPane grdpn = new GridPane();		
+		TableView table = new TableView();
+	    TableColumn<CtSurvey,String> surveyNameCol = new TableColumn<CtSurvey,String>("Name");
+	    TableColumn<CtSurvey,String> surveyIdCol = new TableColumn<CtSurvey,String>("ID");
+	    TableColumn<CtSurvey,String> surveyStatusCol = new TableColumn<CtSurvey,String>("Status");
+	    surveyNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+				return new ReadOnlyObjectWrapper<String>(survey.getValue().name.getValue());
+			}
+		});
+	    surveyIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+				return new ReadOnlyObjectWrapper<String>(survey.getValue().id.value.getValue());
+			}
+		});
+	    surveyStatusCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+				return new ReadOnlyObjectWrapper<String>(survey.getValue().status.toString());
+			}
+		});
+	    table.getColumns().addAll(surveyIdCol,surveyNameCol,surveyStatusCol);
+	    setColumnsSameWidth(table);
+	    Button select = new Button();
+	    select.setText("Select");
+	    grdpn.add(table, 1, 1);
+	    grdpn.add(select, 1, 2);
+	    updateSurveysTable(table);   
+		
+	    anchrpnCoordinatorDetails.getChildren().add(grdpn);
+		AnchorPane.setTopAnchor(grdpn, 0.0);
+		AnchorPane.setLeftAnchor(grdpn, 0.0);
+		AnchorPane.setBottomAnchor(grdpn, 0.0);
+		AnchorPane.setRightAnchor(grdpn, 0.0);
+		select.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				CtSurvey survey = (CtSurvey)getObjectFromTableView(table);
+				showSelectedSurveyResults(survey);
+			}
+		});
+		
+	}
+	
+	private void showSelectedSurveyResults(CtSurvey survey) {
+		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
+			anchrpnCoordinatorDetails.getChildren().remove(i);
+		Label surveyName = new Label();
+		surveyName.setText(survey.name.getValue());
+		GridPane grdpn = new GridPane();
+		grdpn.add(surveyName, 1, 1);
+		Server server = Server.getInstance();
+		
+		TableView table = new TableView();
+	    TableColumn<CtQuestion,String> QuestionNameCol = new TableColumn<CtQuestion,String>("question");
+	    TableColumn<CtQuestion,String> QuestionIdCol = new TableColumn<CtQuestion,String>("id");
+	    TableColumn<CtQuestion,String> surveyIdCol = new TableColumn<CtQuestion,String>("id_survey");
+	    QuestionNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().question.getValue());
+			}
+		});
+	    surveyIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().survey_id.value.getValue());
+			}
+		});
+	    QuestionIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+				return new ReadOnlyObjectWrapper<String>(question.getValue().id.toString());
+			}
+		});
+	    table.getColumns().addAll(QuestionIdCol,QuestionNameCol,surveyIdCol);
+	    setColumnsSameWidth(table);
+	    ArrayList<CtQuestion> questions = null;
+		try {
+			questions = server.sys().getQuestionsWithSurveyID(survey.id.value.getValue());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+		table.setItems(FXCollections.observableArrayList( questions));
+		grdpn.add(table, 1, 2);
+		Button select = new Button();
+	    select.setText("Select");
+	    grdpn.add(select, 1, 3);
+		anchrpnCoordinatorDetails.getChildren().add(grdpn);
+		AnchorPane.setTopAnchor(grdpn, 0.0);
+		AnchorPane.setLeftAnchor(grdpn, 0.0);
+		AnchorPane.setBottomAnchor(grdpn, 0.0);
+		AnchorPane.setRightAnchor(grdpn, 0.0);
+		select.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				CtQuestion question = (CtQuestion)getObjectFromTableView(table);
+				showSelectedQuestionResults(question);
+			}
+		});
+	}
+	
+	public void showSelectedQuestionResults(CtQuestion question) {
+		for(int i = anchrpnCoordinatorDetails.getChildren().size() -1; i >= 0; i--)
+			anchrpnCoordinatorDetails.getChildren().remove(i);
+		Label questionName = new Label();
+		questionName.setText(question.question.getValue());
+		GridPane grdpn = new GridPane();
+		grdpn.add(questionName, 1, 1);
+		Server server = Server.getInstance();
+		
+		TableView table = new TableView();
+	    TableColumn<CtAnswer,String> answerNameCol = new TableColumn<CtAnswer,String>("answer");
+	    TableColumn<CtAnswer,String> answerIdCol = new TableColumn<CtAnswer,String>("id");
+	    TableColumn<CtAnswer,String> questionIdCol = new TableColumn<CtAnswer,String>("id_question");
+	    TableColumn<CtAnswer,String> count = new TableColumn<CtAnswer,String>("count");
+
+	    answerNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().answer.getValue());
+			}
+		});
+	    answerIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().id.value.getValue());
+			}
+		});
+	    questionIdCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(answer.getValue().question_id.toString());
+			}
+		});
+	    count.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+				return new ReadOnlyObjectWrapper<String>(String.valueOf(answer.getValue().count));
+			}
+		});
+	    table.getColumns().addAll(answerIdCol,answerNameCol,questionIdCol,count);
+	    setColumnsSameWidth(table);
+	    ArrayList<CtAnswer> answers = null;
+		try {
+			answers = server.sys().getAnswersWithQuestionID(question.id.value.getValue());
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			e.printStackTrace();
+		}
+		table.setItems(FXCollections.observableArrayList(answers));
+		grdpn.add(table, 1, 2);
+		anchrpnCoordinatorDetails.getChildren().add(grdpn);
+		AnchorPane.setTopAnchor(grdpn, 0.0);
+		AnchorPane.setLeftAnchor(grdpn, 0.0);
+		AnchorPane.setBottomAnchor(grdpn, 0.0);
+		AnchorPane.setRightAnchor(grdpn, 0.0);
+		
+	}
+	
 	/**
 	 * Shows the answer screen.
 	 *

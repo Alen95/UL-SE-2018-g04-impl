@@ -179,4 +179,47 @@ public class DbQuestions extends DbAbstract{
 
 	}
 
+	/**
+	 * Gets all questions with the provided survey id
+	 * @param value The id of of the survey
+	 * @return List of questions with the same id like the one provided
+	 */
+	public static ArrayList<CtQuestion> getQuestionsWithSurveyID(String value) {
+		
+		ArrayList<CtQuestion> questions = new ArrayList<CtQuestion>();
+		
+		try {
+			conn = DriverManager.getConnection(url+dbName,userName,password);
+			log.debug("Connected to the database");
+
+			/********************/
+			//Select
+			
+			try{
+				String sql = "SELECT * FROM "+ dbName + ".questions WHERE id_survey = "+ value;
+
+				PreparedStatement statement = conn.prepareStatement(sql);
+				ResultSet  res = statement.executeQuery(sql);
+				
+				while(res.next()) {
+					CtQuestion question = new CtQuestion();
+					question.init(new DtQuestionID(new PtString(res.getString("id"))), new PtString(res.getString("question")), new DtSurveyID(new PtString(res.getString("id_survey"))));
+					questions.add(question);
+				}
+								
+			}
+			catch (SQLException s){
+				log.error("SQL statement is not executed! "+s);
+			}
+			conn.close();
+			log.debug("Disconnected from database");
+			
+			
+		} catch (Exception e) {
+			logException(e);
+		}
+				
+		return questions;
+	}
+
 }

@@ -1604,9 +1604,60 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			surveys = DbSurveys.getAllSurveys();
 		}
 		catch (Exception e){
-			log.error("Exception in oeGetAllSurveys..." + e);
+			log.error("Exception in getAllSurveys..." + e);
 		}
 		return surveys;
+	}
+
+	@Override
+	public CtSurvey getOpenSurvey() throws RemoteException {
+		CtSurvey survey = new CtSurvey();
+		try{
+		//PreP1
+		isSystemStarted();
+		//PreP2
+		isUserLoggedIn();
+			//PostF1
+			survey = DbSurveys.getOpenSurvey();
+		}
+		catch (Exception e){
+			log.error("Exception in getOpenSurvey..." + e);
+		}
+		return survey;
+	}
+
+	@Override
+	public ArrayList<CtQuestion> getQuestionsWithSurveyID(String value) throws RemoteException {
+		ArrayList<CtQuestion> questions = new ArrayList<>();
+		try{
+		//PreP1
+		isSystemStarted();
+		//PreP2
+		isUserLoggedIn();
+			//PostF1
+			questions = DbQuestions.getQuestionsWithSurveyID(value);
+		}
+		catch (Exception e){
+			log.error("Exception in getQuestionsWithSurveyID..." + e);
+		}
+		return questions;
+	}
+
+	@Override
+	public ArrayList<CtAnswer> getAnswersWithQuestionID(String value) throws RemoteException {
+		ArrayList<CtAnswer> answers = new ArrayList<>();
+		try{
+		//PreP1
+		isSystemStarted();
+		//PreP2
+		isUserLoggedIn();
+			//PostF1
+			answers = DbAnswers.getAnswersWithQuestionID(value);
+		}
+		catch (Exception e){
+			log.error("Exception in getAnswersWithQuestionID..." + e);
+		}
+		return answers;
 	}
 	
 }

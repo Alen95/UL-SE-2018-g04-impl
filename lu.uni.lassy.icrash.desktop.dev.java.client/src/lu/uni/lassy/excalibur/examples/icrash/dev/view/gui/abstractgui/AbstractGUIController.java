@@ -515,10 +515,11 @@ public abstract class AbstractGUIController implements Initializable {
 	}
 	
 	/**
-	 * Sets up the answers tableviews with the correct columns
-	 * @param tblvwAnswers2
-	 * @throws NotBoundException 
-	 * @throws RemoteException 
+	 * Set up the answer and question tables
+	 * @param tblvwa The answer table
+	 * @param tblvwq The question table
+	 * @throws RemoteException Thrown if server offline
+	 * @throws NotBoundException Thrown if server bounds not defined
 	 */
 	public void setUpAnswerAndQuestionTables(TableView<CtAnswer> tblvwa,TableView<CtQuestion> tblvwq) throws RemoteException, NotBoundException {
 	    TableColumn<CtAnswer,String> answerNameCol = new TableColumn<CtAnswer,String>("answer");

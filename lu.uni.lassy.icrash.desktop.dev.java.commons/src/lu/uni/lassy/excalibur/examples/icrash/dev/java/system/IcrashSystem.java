@@ -438,6 +438,12 @@ public interface IcrashSystem extends Remote {
 
 	public PtBoolean oeSelectAnswer(String id) throws RemoteException;
 
-	public ArrayList<CtSurvey> getAllSurveys() throws RemoteException; 
+	public ArrayList<CtSurvey> getAllSurveys() throws RemoteException;
+
+	public CtSurvey getOpenSurvey() throws RemoteException;
+
+	public ArrayList<CtQuestion> getQuestionsWithSurveyID(String value) throws RemoteException;
+
+	public ArrayList<CtAnswer> getAnswersWithQuestionID(String value) throws RemoteException; 
 
 }
