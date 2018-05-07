@@ -31,6 +31,7 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAl
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtAnswer;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtCrisis;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtQuestion;
+import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.CtSurvey;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtAnswerID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.DtQuestionID;
 import lu.uni.lassy.excalibur.examples.icrash.dev.java.system.types.primary.EtAlertStatus;
@@ -43,10 +44,14 @@ import lu.uni.lassy.excalibur.examples.icrash.dev.model.Server;
 import lu.uni.lassy.excalibur.examples.icrash.dev.model.actors.ActProxyCoordinatorImpl;
 import lu.uni.lassy.excalibur.examples.icrash.dev.view.gui.abstractgui.AbstractAuthGUIController;
 import javafx.scene.control.ButtonBar.ButtonData;
+import javafx.scene.control.TableColumn.CellDataFeatures;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.GridPane;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -64,6 +69,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
@@ -175,6 +181,13 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
     @FXML
     private TableView<CtQuestion> tblvwQuestions;
     
+    /** The tableview of the surveys the user has retrieved from the system */
+    @FXML
+    private TableView<CtSurvey> tblvwSurveys;
+    
+    @FXML
+    private GridPane surveyPane;
+    
     /**
      * Button event that deals with changing the status of a crisis
      *
@@ -255,18 +268,6 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
     	validateAlert();
     }
     
-    /**
-     * Button event that deals with selecting an answer
-     *
-     * @param event The event type fired, we do not need it's details
-     * @throws NotBoundException 
-     * @throws RemoteException 
-     */
-    @FXML
-    void bttnSelectAnswer_OnClick(ActionEvent event)  {
-    		selectAnswer();
-    }
-    
     /*
      * These are other classes accessed by this controller
      */
@@ -290,31 +291,144 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 		setUpMessageTables(tblvwCoordMessages);
 		setUpCrisesTables(tblvwCrisis);
 		setUpAlertTables(tblvwAlerts);
-		try {
-			setUpAnswerAndQuestionTables(tblvwAnswers,tblvwQuestions);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			e.printStackTrace();
-		}
+		//setUpAnswerAndQuestionTables(tblvwAnswers,tblvwQuestions);
+		setUpSurveysTable();
+		
+	
 		cmbbxCrisisStatus.setItems( FXCollections.observableArrayList( EtCrisisStatus.values()));
 		cmbbxAlertStatus.setItems( FXCollections.observableArrayList( EtAlertStatus.values()));
 		
 	}
 
 	
-	private void selectAnswer() {
-		CtAnswer answer = (CtAnswer)getObjectFromTableView(tblvwAnswers);
-		if (answer != null){
-			try {
-				if (!userController.selectAnswer(answer.id.value.getValue()).getValue())
-					showWarningMessage("Unable to handle answer", "Unable to select, please try again");
-			} catch (ServerOfflineException | ServerNotBoundException e) {
-				showServerOffLineMessage(e);
+	private void setUpSurveysTable() {
+		TableView table = new TableView();
+	    TableColumn<CtSurvey,String> surveyNameCol = new TableColumn<CtSurvey,String>("Name");
+	    TableColumn<CtSurvey,String> surveyStatusCol = new TableColumn<CtSurvey,String>("Status");
+	    surveyNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+				return new ReadOnlyObjectWrapper<String>(survey.getValue().name.getValue());
 			}
-		}
+		});
+	    surveyStatusCol.setCellValueFactory(new Callback<CellDataFeatures<CtSurvey, String>, ObservableValue<String>>() {
+			public ObservableValue<String> call(CellDataFeatures<CtSurvey, String> survey) {
+				return new ReadOnlyObjectWrapper<String>(survey.getValue().status.toString());
+			}
+		});
+	    table.getColumns().addAll(surveyNameCol,surveyStatusCol);
+	    setColumnsSameWidth(table);
+	    Button select = new Button();
+	    select.setText("Select");
+	    surveyPane.add(table, 0, 1);
+	    surveyPane.add(select, 0, 2);
+	    updateSurveysTable(table);   
+		
+		select.setOnAction(new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				CtSurvey survey = (CtSurvey)getObjectFromTableView(table);
+				surveyPane.getChildren().clear();
+				showSelectedSurveyResults(survey);
+			}
+
+			private void showSelectedSurveyResults(CtSurvey survey) {
+				Label surveyName = new Label();
+				surveyName.setText(survey.name.getValue());
+				surveyPane.add(surveyName, 0, 0);
+				Server server = Server.getInstance();
+				
+				TableView table = new TableView();
+			    TableColumn<CtQuestion,String> QuestionNameCol = new TableColumn<CtQuestion,String>("question");
+			    QuestionNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtQuestion, String>, ObservableValue<String>>() {
+					public ObservableValue<String> call(CellDataFeatures<CtQuestion, String> question) {
+						return new ReadOnlyObjectWrapper<String>(question.getValue().question.getValue());
+					}
+				});
+			    table.getColumns().addAll(QuestionNameCol);
+			    setColumnsSameWidth(table);
+			    ArrayList<CtQuestion> questions = null;
+				try {
+					questions = server.sys().getQuestionsWithSurveyID(survey.id.value.getValue());
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				} catch (NotBoundException e) {
+					e.printStackTrace();
+				}
+				table.setItems(FXCollections.observableArrayList( questions));
+				surveyPane.add(table, 0, 1);
+				Button select = new Button();
+			    select.setText("Select");
+			    surveyPane.add(select, 0, 2);
+				select.setOnAction(new EventHandler<ActionEvent>() {
+					@Override
+					public void handle(ActionEvent event) {
+						CtQuestion question = (CtQuestion)getObjectFromTableView(table);
+						surveyPane.getChildren().clear();
+						showSelectedQuestionResults(question);
+						
+					}
+
+					private void showSelectedQuestionResults(CtQuestion question) {
+						Label questionName = new Label();
+						questionName.setText(question.question.getValue());
+						surveyPane.add(questionName, 0, 0);
+						Server server = Server.getInstance();
+						
+						TableView table = new TableView();
+					    TableColumn<CtAnswer,String> answerNameCol = new TableColumn<CtAnswer,String>("answer");
+
+					    answerNameCol.setCellValueFactory(new Callback<CellDataFeatures<CtAnswer, String>, ObservableValue<String>>() {
+							public ObservableValue<String> call(CellDataFeatures<CtAnswer, String> answer) {
+								return new ReadOnlyObjectWrapper<String>(answer.getValue().answer.getValue());
+							}
+						});
+
+					    table.getColumns().addAll(answerNameCol);
+					    setColumnsSameWidth(table);
+					    ArrayList<CtAnswer> answers = null;
+						try {
+							answers = server.sys().getAnswersWithQuestionID(question.id.value.getValue());
+						} catch (RemoteException e) {
+							e.printStackTrace();
+						} catch (NotBoundException e) {
+							e.printStackTrace();
+						}
+						table.setItems(FXCollections.observableArrayList(answers));
+						surveyPane.add(table, 0, 1);
+						Button select = new Button();
+					    select.setText("Select");
+					    surveyPane.add(select, 0, 2);
+						select.setOnAction(new EventHandler<ActionEvent>() {
+							@Override
+							public void handle(ActionEvent event) {
+								CtAnswer answer = (CtAnswer)getObjectFromTableView(table);
+								if(answer != null) {
+									try {
+										userController.selectAnswer(answer.id.value.getValue());
+									} catch (ServerOfflineException e) {
+										e.printStackTrace();
+									} catch (ServerNotBoundException e) {
+										e.printStackTrace();
+									}
+									surveyPane.getChildren().clear();
+									setUpSurveysTable();
+								}
+							}
+						});
+						
+					}
+				});
+				
+			}
+		});
+		
+	}
+
+	private void updateSurveysTable(TableView table) {
+		Server server = Server.getInstance();
 		try {
-			updateAnswers(tblvwAnswers);
+			ArrayList<CtSurvey> surveys = server.sys().getAllPublishedSurveys();
+			table.setItems(FXCollections.observableArrayList(surveys));
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		} catch (NotBoundException e) {
@@ -322,6 +436,7 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 		}
 		
 	}
+
 	
 	/**
 	 * Populates the tableview with a list of crisis that have the same status as the one provided.

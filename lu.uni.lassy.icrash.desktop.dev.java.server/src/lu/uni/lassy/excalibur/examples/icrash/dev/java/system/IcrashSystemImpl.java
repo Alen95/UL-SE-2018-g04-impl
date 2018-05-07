@@ -1610,7 +1610,7 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 	}
 
 	@Override
-	public CtSurvey getOpenSurvey() throws RemoteException {
+	public CtSurvey getPublishedSurvey() throws RemoteException {
 		CtSurvey survey = new CtSurvey();
 		try{
 		//PreP1
@@ -1618,7 +1618,7 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 		//PreP2
 		isUserLoggedIn();
 			//PostF1
-			survey = DbSurveys.getOpenSurvey();
+			survey = DbSurveys.getPublishedSurvey();
 		}
 		catch (Exception e){
 			log.error("Exception in getOpenSurvey..." + e);
@@ -1659,5 +1659,23 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 		}
 		return answers;
 	}
+
+	@Override
+	public ArrayList<CtSurvey> getAllPublishedSurveys() {
+		ArrayList<CtSurvey> surveys = new ArrayList<>();
+		try{
+		//PreP1
+		isSystemStarted();
+		//PreP2
+		isUserLoggedIn();
+			//PostF1
+			surveys = DbSurveys.getPublishedSurveys();
+		}
+		catch (Exception e){
+			log.error("Exception in getAllPublishedSurveys..." + e);
+		}
+		return surveys;
+	}
+
 	
 }

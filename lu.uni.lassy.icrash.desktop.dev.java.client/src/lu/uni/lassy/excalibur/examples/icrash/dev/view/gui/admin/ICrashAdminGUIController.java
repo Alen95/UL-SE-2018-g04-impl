@@ -332,7 +332,7 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 				return new ReadOnlyObjectWrapper<String>(survey.getValue().status.toString());
 			}
 		});
-	    table.getColumns().addAll(surveyIdCol,surveyNameCol,surveyStatusCol);
+	    table.getColumns().addAll(surveyNameCol,surveyStatusCol);
 	    setColumnsSameWidth(table);
 	    Button select = new Button();
 	    select.setText("Select");
@@ -383,7 +383,7 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 				return new ReadOnlyObjectWrapper<String>(question.getValue().id.toString());
 			}
 		});
-	    table.getColumns().addAll(QuestionIdCol,QuestionNameCol,surveyIdCol);
+	    table.getColumns().addAll(QuestionNameCol);
 	    setColumnsSameWidth(table);
 	    ArrayList<CtQuestion> questions = null;
 		try {
@@ -447,7 +447,7 @@ public class ICrashAdminGUIController extends AbstractAuthGUIController {
 				return new ReadOnlyObjectWrapper<String>(String.valueOf(answer.getValue().count));
 			}
 		});
-	    table.getColumns().addAll(answerIdCol,answerNameCol,questionIdCol,count);
+	    table.getColumns().addAll(answerNameCol,count);
 	    setColumnsSameWidth(table);
 	    ArrayList<CtAnswer> answers = null;
 		try {

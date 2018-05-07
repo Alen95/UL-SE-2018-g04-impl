@@ -8,6 +8,8 @@ public enum EtSurveyStatus{
 	//Survey can be edited
 	open,
 	//Survey cannot be edited anymore
-	closed
+	closed,
+	//Survey can be answered by coordinators
+	published
 
 }

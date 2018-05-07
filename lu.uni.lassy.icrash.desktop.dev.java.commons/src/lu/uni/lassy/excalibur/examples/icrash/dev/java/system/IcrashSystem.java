@@ -440,10 +440,13 @@ public interface IcrashSystem extends Remote {
 
 	public ArrayList<CtSurvey> getAllSurveys() throws RemoteException;
 
-	public CtSurvey getOpenSurvey() throws RemoteException;
+	public CtSurvey getPublishedSurvey() throws RemoteException;
 
 	public ArrayList<CtQuestion> getQuestionsWithSurveyID(String value) throws RemoteException;
 
-	public ArrayList<CtAnswer> getAnswersWithQuestionID(String value) throws RemoteException; 
+	public ArrayList<CtAnswer> getAnswersWithQuestionID(String value) throws RemoteException;
+
+	public ArrayList<CtSurvey> getAllPublishedSurveys() throws RemoteException;
+
 
 }

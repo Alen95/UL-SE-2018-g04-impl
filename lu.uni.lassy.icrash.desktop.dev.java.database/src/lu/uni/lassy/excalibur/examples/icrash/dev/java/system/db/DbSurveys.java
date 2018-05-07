@@ -216,7 +216,7 @@ public class DbSurveys extends DbAbstract{
 	 *
 	 * @return Survey object 
 	 */
-	static public CtSurvey getOpenSurvey(){
+	static public CtSurvey getPublishedSurvey(){
 		CtSurvey survey = new CtSurvey();
 		
 		try {
@@ -227,7 +227,7 @@ public class DbSurveys extends DbAbstract{
 			//Select
 			
 			try{
-				String sql = "SELECT * FROM "+ dbName + ".surveys WHERE status= open ";
+				String sql = "SELECT * FROM "+ dbName + ".surveys WHERE status = published ";
 
 				PreparedStatement statement = conn.prepareStatement(sql);
 				ResultSet  res = statement.executeQuery(sql);
@@ -247,6 +247,47 @@ public class DbSurveys extends DbAbstract{
 		}
 				
 		return survey;
+	}
+
+	/**
+	 * Retunrs all published surveys
+	 * @return List with all the published surveys
+	 */
+	static public ArrayList<CtSurvey> getPublishedSurveys() {
+
+		ArrayList<CtSurvey> surveys = new ArrayList<CtSurvey>();
+		
+		try {
+			conn = DriverManager.getConnection(url+dbName,userName,password);
+			log.debug("Connected to the database");
+
+			/********************/
+			//Select
+			
+			try{
+				String sql = "SELECT * FROM "+ dbName + ".surveys WHERE status = 'published'";
+
+				PreparedStatement statement = conn.prepareStatement(sql);
+				ResultSet  res = statement.executeQuery(sql);
+				while(res.next()) {
+					CtSurvey survey = new CtSurvey();
+					survey.init(new DtSurveyID(new PtString(res.getString("id"))),new PtString(res.getString("name")), EtSurveyStatus.valueOf(res.getString("status").toLowerCase()));
+					surveys.add(survey);
+				}
+
+			}
+			catch (SQLException s){
+				log.error("SQL statement is not executed! "+s);
+			}
+			conn.close();
+			log.debug("Disconnected from database");
+			
+			
+		} catch (Exception e) {
+			logException(e);
+		}
+				
+		return surveys;
 	}
 	
 	
