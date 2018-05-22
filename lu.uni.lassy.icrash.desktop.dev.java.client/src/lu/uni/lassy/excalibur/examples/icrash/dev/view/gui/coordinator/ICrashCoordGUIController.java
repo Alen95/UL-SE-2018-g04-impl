@@ -188,6 +188,9 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
     @FXML
     private GridPane surveyPane;
     
+    @FXML
+    private Label surveyNotification;
+    
     /**
      * Button event that deals with changing the status of a crisis
      *
@@ -328,10 +331,10 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 			public void handle(ActionEvent event) {
 				CtSurvey survey = (CtSurvey)getObjectFromTableView(table);
 				surveyPane.getChildren().clear();
-				showSelectedSurveyResults(survey);
+				showSelectedSurveyQuestions(survey);
 			}
 
-			private void showSelectedSurveyResults(CtSurvey survey) {
+			private void showSelectedSurveyQuestions(CtSurvey survey) {
 				Label surveyName = new Label();
 				surveyName.setText(survey.name.getValue());
 				surveyPane.add(surveyName, 0, 0);
@@ -645,6 +648,21 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 			catch (ServerOfflineException | ServerNotBoundException e) {
 				showExceptionErrorMessage(e);
 			}
+		Server server = Server.getInstance();
+		ArrayList<CtSurvey> surveys = new ArrayList<>();
+		try {
+			surveys = server.sys().getAllPublishedSurveys();
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotBoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if(surveys.size()>0) {
+			surveyNotification.setVisible(true);
+			surveyNotification.setText("There is atleast one open Survey !");
+		}
     	}
     	else
     		showWarningNoDataEntered();
@@ -658,6 +676,7 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 		try {
 			if (userController.oeLogout().getValue()){
 				logonShowPanes(false);
+				surveyNotification.setText("");
 			}
 		} catch (ServerOfflineException | ServerNotBoundException e) {
 			showExceptionErrorMessage(e);
@@ -700,6 +719,7 @@ public class ICrashCoordGUIController extends AbstractAuthGUIController {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		setUpTables();
+		surveyNotification.setVisible(false);
 		cmbbxAlertStatus.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {

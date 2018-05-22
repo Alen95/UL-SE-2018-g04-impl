@@ -14,4 +14,14 @@ public class DtSurveyID extends DtString{
 	public DtSurveyID(PtString s) {
 		super(s);
 	}
+	
+	public boolean is(DtSurveyID adtSurveyID) {
+		String id = adtSurveyID.value.getValue();
+		try {
+			int i = Integer.parseInt(id);
+		}catch(NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -1387,6 +1387,15 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			IcrashEnvironment env = (IcrashEnvironment) registry
 					.lookup("iCrashEnvironment");;
 
+			//PreF1
+			if(!aDtSurveyID.is(aDtSurveyID)) return new PtBoolean(false);
+			//PreF2
+			List<CtSurvey> surveys  = oeGetSurveys();
+			for(CtSurvey survey : surveys) {
+				if(survey.id.value.getValue().equals(aDtSurveyID.value.getValue())) {
+					return new PtBoolean(false);
+				}
+			}
 			//PostF2
 			CtSurvey ctSurvey = new CtSurvey();
 			ctSurvey.init(aDtSurveyID, name, status);
@@ -1413,12 +1422,24 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(), RmiUtils.getInstance().getPort());
 			IcrashEnvironment env = (IcrashEnvironment) registry
 					.lookup("iCrashEnvironment");;
-
+			//PreF1
+			if(!aDtSurveyID.is(aDtSurveyID)) return new PtBoolean(false);
+			//PreF2
+			int amount = 0;
+			List<CtSurvey> surveys  = oeGetSurveys();
+			for(CtSurvey survey : surveys) {
+				if(survey.id.value.getValue().equals(aDtSurveyID.value.getValue())) {
+					amount++;
+				}
+			}
+			if(amount == 0) return new PtBoolean(false);
+			//PreF3
+			status.is(status);
 			//PostF2
 			DbSurveys.updateSurveyStatus(aDtSurveyID, status);
-			//PostF5
+			
 			ActAdministrator admin = (ActAdministrator) currentRequestingAuthenticatedActor;
-			admin.ieSurveyEdited();
+			admin.ieMessage(new PtString("Status of survey with"+ aDtSurveyID.value.getValue()+" changed to"+ status.toString()));
 			
 		} catch (Exception ex) {
 			log.error("Exception in oeCreateSurvey..." + ex);
@@ -1438,13 +1459,32 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(), RmiUtils.getInstance().getPort());
 			IcrashEnvironment env = (IcrashEnvironment) registry
 					.lookup("iCrashEnvironment");;
-
-			//PostF2
+			//PreF1
+			if(!aDtQuestionID.is(aDtQuestionID)) return new PtBoolean(false);
+			//PreF2
+			if(!aDtSurveyID.is(aDtSurveyID)) return new PtBoolean(false);
+			//PreF3
+			int amount = 0;
+			List<CtSurvey> surveys  = oeGetSurveys();
+			for(CtSurvey survey : surveys) {
+				if(survey.id.value.getValue().equals(aDtSurveyID.value.getValue())) {
+					amount++;
+				}
+			}
+			if(amount == 0) return new PtBoolean(false);
+			//PreF4
+			List<CtQuestion> questions  = getAllQuestions();
+			for(CtQuestion question : questions) {
+				if(question.id.value.getValue().equals(aDtQuestionID.value.getValue())) {
+					return new PtBoolean(false);
+				}
+			}
+			//PostF1
 			CtQuestion ctQuestion = new CtQuestion();
 			ctQuestion.init(aDtQuestionID, qQuestion, aDtSurveyID);
 			DbQuestions.insertQuestion(ctQuestion.id.value.getValue(),qQuestion.getValue(),ctQuestion.survey_id.value.getValue());
 
-			//PostF5
+			//PostF2
 			ActAdministrator admin = (ActAdministrator) currentRequestingAuthenticatedActor;
 			admin.ieQuestionAdded();
 			
@@ -1578,12 +1618,12 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			IcrashEnvironment env = (IcrashEnvironment) registry
 					.lookup("iCrashEnvironment");;
 
-			//PostF2
+			
 			DbAnswers.selectAnswer(id);
 
-			//PostF5
+		
 			ActCoordinator coord= (ActCoordinator) currentRequestingAuthenticatedActor;
-			coord.ieAnswerSelected();
+			coord.ieMessage(new PtString("Answer with ID "+id +"selected"));
 			
 		} catch (Exception ex) {
 			log.error("Exception in oeSelectAnswer..." + ex);

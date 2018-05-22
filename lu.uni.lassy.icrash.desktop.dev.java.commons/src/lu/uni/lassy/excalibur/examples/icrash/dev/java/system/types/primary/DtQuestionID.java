@@ -13,4 +13,15 @@ public class DtQuestionID extends DtString{
 	public DtQuestionID(PtString s) {
 		super(s);
 	}
+
+	public boolean is(DtQuestionID aDtQuestionID) {
+		String id = aDtQuestionID.value.getValue();
+		try {
+			int i = Integer.parseInt(id);
+		}catch(NumberFormatException nfe) {
+			return false;
+		}
+		return true;
+		
+	}
 }	

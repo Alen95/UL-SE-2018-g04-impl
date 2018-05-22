@@ -10,6 +10,15 @@ public enum EtSurveyStatus{
 	//Survey cannot be edited anymore
 	closed,
 	//Survey can be answered by coordinators
-	published
+	published;
+
+	public boolean is(EtSurveyStatus status) {
+		if((status.name() != "open")||(status.name() != "closed")||(status.name() != "published")) {
+			return false;
+		}else {
+			return true;
+		}
+		
+	}
 
 }
