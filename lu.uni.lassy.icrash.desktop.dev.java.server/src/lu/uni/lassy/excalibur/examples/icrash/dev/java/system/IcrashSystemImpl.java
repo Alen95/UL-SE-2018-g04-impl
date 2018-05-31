@@ -1396,7 +1396,7 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 					return new PtBoolean(false);
 				}
 			}
-			//PostF2
+			//PostF1
 			CtSurvey ctSurvey = new CtSurvey();
 			ctSurvey.init(aDtSurveyID, name, status);
 			DbSurveys.insertSurvey(ctSurvey.id.value.getValue(),ctSurvey.name.getValue(),"open");
@@ -1506,7 +1506,26 @@ public class IcrashSystemImpl extends UnicastRemoteObject implements
 			Registry registry = LocateRegistry.getRegistry(RmiUtils.getInstance().getHost(), RmiUtils.getInstance().getPort());
 			IcrashEnvironment env = (IcrashEnvironment) registry
 					.lookup("iCrashEnvironment");;
-
+			//PreF1
+			if(!aDtQuestionID.is(aDtQuestionID)) return new PtBoolean(false);
+			//PreF2
+			if(!aDtAnswerID.is(aDtAnswerID)) return new PtBoolean(false);
+			//PreF3
+			List<CtAnswer> answers  = getAllAnswers();
+			for(CtAnswer answer : answers) {
+				if(answer.id.value.getValue().equals(aDtAnswerID.value.getValue())) {
+					return new PtBoolean(false);
+				}
+			}
+			//PreF4
+			int amount = 0;
+			List<CtQuestion> questions  = getAllQuestions();
+			for(CtQuestion question : questions) {
+				if(question.id.value.getValue().equals(aDtQuestionID.value.getValue())) {
+					amount++;
+				}
+			}
+			if(amount == 0) return new PtBoolean(false);
 			//PostF2
 			CtAnswer ctAnswer= new CtAnswer();
 			ctAnswer.init(aDtAnswerID, aAnswer, aDtQuestionID,0);
